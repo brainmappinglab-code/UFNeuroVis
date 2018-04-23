@@ -1,0 +1,20 @@
+#!/bin/bash
+
+# $1 is the subject name, $2 is number of cores to be used
+cd $SUBJECTS_DIR/
+
+recon-all -gcareg -canorm -careg -calabel -normalization2 -maskbfs -segmentation -fill -tessellate -smooth1 -inflate1 -subjid $1 -parallel -openmp $2
+
+cp $1/surf/lh.orig.nofix $1/surf/lh.orig
+cp $1/surf/lh.inflated.nofix $1/surf/lh.inflated
+mris_euler_number $1/surf/lh.orig
+mris_remove_intersection $1/surf/lh.orig $1/surf/lh.orig
+rm $1/surf/lh.inflated
+
+cp $1/surf/rh.orig.nofix $1/surf/rh.orig
+cp $1/surf/rh.inflated.nofix $1/surf/rh.inflated
+mris_euler_number $1/surf/rh.orig
+mris_remove_intersection $1/surf/rh.orig $1/surf/rh.orig
+rm $1/surf/rh.inflated
+
+recon-all -white -smooth2 -inflate2 -curvHK -curvstats -subjid $1 -parallel -openmp $2

@@ -1,0 +1,20 @@
+#how to use
+
+#to sort folder of dicoms (path after -D option) and put them in DICOMSORT folder (path after -o option)
+ hjimg__dcmsort  -D IMAGES -o DICOMSORT
+
+#to convert the sorted dicoms in nifti
+#first argument is the output folder, second argument is the input folder where the DICOMs were sorted (I kept a syntax similar to dcm2niix)
+hjimg__convert_tonii niix DICOMSORT
+
+
+#EXTRA NOTES
+
+# hjimg__dcmsort
+#   It depends upon DCMTK's dcmdump program.
+#   If missing install with: > sudo apt install dcmtk
+#   use NeuroDebian distribution when possible
+
+# hjimg__convert_tonii
+#   depends on dcm2niix
+#   If missing install with: > sudo apt install dcm2niix

@@ -1,0 +1,43 @@
+#!/usr/bin/env python3
+# to convert the sorted dicoms in nifti
+# first argument is the output folder, second argument is the input folder where the DICOMs were sorted 
+# (I kept a syntax similar to dcm2niix) 
+#   e.g. hjimg__convert_tonii niix DICOMSORT
+#
+# Author: Enrico Opri, March 2018
+#
+# TIP:
+# this function depends on dcm2niix
+# If missing install with: > sudo apt install dcm2niix
+
+#TODO: look into dcm2niix -f %t_%p_%s ~/dicomDir
+
+import os
+import sys
+from subprocess import call
+
+cwd = os.getcwd()
+#print(cwd)
+
+source_fld=sys.argv[2]
+out_fld=sys.argv[1]
+
+#make folder to put the outputs
+try:
+    os.mkdir(out_fld)
+except:
+    pass
+
+#print(next(os.walk(source_fld))[1])
+
+for x in next(os.walk(source_fld))[1]:
+    #call(["dcm2niix", " -o " + out_fld + " \""+source_fld+"/"+x+"\""])
+    #os.system("dcm2niix"+" -o " + out_fld + " \""+source_fld+"/"+x+"\"")
+    #print("dcm2niix"+" -o " + out_fld + " \""+source_fld+"/"+x+"\"")
+    #call(["dcm2niix", " -o " + cwd + "/" + out_fld + " \""+cwd+"/"+ source_fld+"/"+x+"\""])
+    
+    #this line crops the image
+    #os.system("dcm2niix"+" -z n -x y -b n -o " + cwd + "/" + out_fld + " \""+cwd+"/"+ source_fld+"/"+x+"\"")
+    #os.system("dcm2niix"+" -z n -b n -o " + cwd + "/" + out_fld + " \""+cwd+"/"+ source_fld+"/"+x+"\"")
+    os.system("dcm2niix"+" -z n -b n -o \"" + out_fld + "\" \"" + source_fld+"/"+x+"\"")
+

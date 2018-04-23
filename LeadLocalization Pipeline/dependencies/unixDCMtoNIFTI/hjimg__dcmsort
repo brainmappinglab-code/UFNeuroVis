@@ -1,0 +1,76 @@
+#!/bin/bash
+
+# Author: Enrico Opri, March 2018
+# Based on the work of: Chuck Theobald, March 2012
+# This script is tailored on the TOSHIBA DICOM of SHANDS
+#
+# It depends upon DCMTK's dcmdump program.
+# If missing install with: > sudo apt install dcmtk
+# use NeuroDebian distribution when possible
+# 
+# It will copy a directory full of DICOM files into the
+# given output directory with a sub-directory named for
+# the ProtocolName group,element.  
+
+function usage {
+  echo "Usage: $0 -D <DICOM directory>"
+  echo "          -o Output directory"
+  echo "          -h This page"
+}
+
+while getopts "hD:o:" flag
+do
+  case "$flag" in
+    D)
+      DICOMDIR=$OPTARG
+      ;;
+    o)
+      OUTDIR=$OPTARG
+      ;;
+    h|?)
+      usage
+      exit 2
+      ;;
+  esac
+done
+
+if [ -z "${DICOMDIR}" ]; then
+  echo "DICOMDIR is required (-D argument)"
+  usage
+  exit 2
+fi
+
+if [ -z "${OUTDIR}" ]; then
+  echo "OUTDIR is required (-o argument)"
+  usage
+  exit 3
+else
+  mkdir ${OUTDIR}
+fi
+
+# Select each file in given DICOM directory.
+for d in ${DICOMDIR}/*
+do
+  echo -n .
+  ProtocolName=$(dcmdump ${d} | grep -e '^(0018,1030)' | sed -e 's/^(0018,1030).*\[\(.*\)\].*/\1/')
+  ProtocolName=$(echo "$ProtocolName" | sed 's/\//_/g')
+  #delete special characters *,?
+  ProtocolName=$(echo "$ProtocolName" | sed 's/\*//g')
+  ProtocolName=$(echo "$ProtocolName" | sed 's/\?//g')
+  
+  ProtocolDescr=$(dcmdump ${d} | grep -e '^(0008,1030)' | sed -e 's/^(0008,1030).*\[\(.*\)\].*/\1/')
+  ProtocolDescr=$(echo "$ProtocolDescr" | sed 's/\//_/g')
+  #delete special characters *,?
+  ProtocolDescr=$(echo "$ProtocolDescr" | sed 's/\*//g')
+  ProtocolDescr=$(echo "$ProtocolDescr" | sed 's/\?//g')
+  
+  DESTDIR=$(echo ${OUTDIR}/${ProtocolName}__${ProtocolDescr})
+
+  if [ ! -d "$DESTDIR" ]; then
+    mkdir "$DESTDIR"
+    echo "$DESTDIR"
+  fi
+  cp ${d} "${DESTDIR}"/
+done
+ls ${OUTDIR}
+
