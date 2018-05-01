@@ -933,7 +933,7 @@ function rightCheckbox_Callback(hObject, eventdata, handles)
     atlasDir = '\\gunduz-lab.bme.ufl.edu\Data\BOVA_Atlas\rh';
     allAtlas = dir([atlasDir,filesep,'*.nii']);
     disp('Loading atlas...')
-    for n = 1:length(allAtlas)
+    for n = 1:length(allAtlas) %
         atlases(n) = loadNifTi([atlasDir,filesep,allAtlas(n).name]);
     end
     setappdata(handles.figure1,'atlases',atlases);
