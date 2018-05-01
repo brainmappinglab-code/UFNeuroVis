@@ -128,6 +128,20 @@ end
 %% Step 4: Coregister the Post-operative CT Scan to T1 MRI in AC-PC Coordinate
 if ~isempty(dir([Processed_DIR,filesep,'rpostop_ct.nii']))
     coregistered_CT = loadNifTi([Processed_DIR,filesep,'rpostop_ct.nii']);
+elseif isempty(dir([Processed_DIR,filesep,'postop_ct.nii']))
+    %if there is no postopCT, ask if user wants to do it just based on MRI
+    %This would be the case if we only have a postoperative MRI available
+    option1 = 'Use Postoperative MRI';
+    option2 = 'Cancel';
+    answer = questdlg('There is no postop_ct.nii, only an anat_t1.nii. What would you like to do?',...
+                      'Please Respond',...
+                      option1,option2,option2);
+    switch answer
+        case option1
+            coregistered_CT = preop_T1_acpc;
+        case option2
+            return;
+    end
 else
     postop_CT = loadNifTi([Processed_DIR,filesep,'postop_ct.nii']);
     [coregistered_CT, tform] = coregisterMRI(preop_T1_acpc, postop_CT);

@@ -252,21 +252,39 @@ handles = guidata(hObject);
 switch type
     case 'CTmax'
         handles.CT.contrast(2) = hObject.Value;
+        if strcmp(handles.CT.fileprefix,handles.MRI.fileprefix)
+            handles.MRI.contrast(2) = hObject.Value; 
+        end
         if handles.CTSlider.min.Value > hObject.Value
             handles.CTSlider.min.Value = hObject.Value;
             handles.CT.contrast(1) = hObject.Value;
+            if strcmp(handles.CT.fileprefix,handles.MRI.fileprefix)
+                handles.MRI.contrast(1) = hObject.Value; 
+            end
         end
     case 'CTmin'
         handles.CT.contrast(1) = hObject.Value;
+        if strcmp(handles.CT.fileprefix,handles.MRI.fileprefix)
+            handles.MRI.contrast(1) = hObject.Value; 
+        end
         if handles.CTSlider.max.Value < hObject.Value
             handles.CTSlider.max.Value = hObject.Value;
             handles.CT.contrast(2) = hObject.Value;
+            if strcmp(handles.CT.fileprefix,handles.MRI.fileprefix)
+                handles.MRI.contrast(1) = hObject.Value; 
+            end
         end
 end
 handles.CT.img = handles.originalCT;
 handles.CT.img = (handles.CT.img - handles.CT.contrast(1)) / handles.CT.contrast(2);
 handles.CT.img(handles.CT.img < 0) = 0;
 handles.CT.img(handles.CT.img > 1) = 1;
+if strcmp(handles.CT.fileprefix,handles.MRI.fileprefix)
+    handles.MRI.img = handles.originalCT;
+    handles.MRI.img = (handles.CT.img - handles.CT.contrast(1)) / handles.CT.contrast(2);
+    handles.MRI.img(handles.CT.img < 0) = 0;
+    handles.MRI.img(handles.CT.img > 1) = 1;
+end
 updateSlices(handles)
 
 %-------------------------------------%
@@ -303,6 +321,7 @@ switch type
         handles.leadlocalization.lead.distal = handles.MRI.centerDimensions;
     case 'proximal'
         handles.leadlocalization.lead.proximal = handles.MRI.centerDimensions;
+        disp(sqrt(sum((handles.leadlocalization.lead.distal-handles.leadlocalization.lead.proximal).^2)))
 end
 updateSlices(handles);
 

@@ -15,7 +15,23 @@ end
 cd(subDir);
 
 % Import BOVA Atlas Fit
-BOVATransformation = load([subDir,filesep,'Processed',filesep,'BOVAFit.mat']);
+%BOVATransformation = load([subDir,filesep,'Processed',filesep,'BOVAFit.mat']);
+
+%Chauncey Wissam patient
+BOVATransformation.Left.Translation = [-4 -2 0];
+BOVATransformation.Left.Scale = [1 0.95 0.98];
+BOVATransformation.Left.Rotation = deg2rad([6 6 -3]);
+BOVATransformation.Right.Translation = [-2 1 4];
+BOVATransformation.Right.Scale = [1 0.95 0.98];
+BOVATransformation.Right.Rotation = deg2rad([8 -2 -1]);
+
+%Ramirez ZI patient
+BOVATransformation.Left.Translation = [1.5 -1.25 2];
+BOVATransformation.Left.Scale = [0.95 0.95 0.9];
+BOVATransformation.Left.Rotation = deg2rad([2 9.5 -1]);
+BOVATransformation.Right.Translation = [-1 1 0.5];
+BOVATransformation.Right.Scale = [0.94 0.93 0.9];
+BOVATransformation.Right.Rotation = deg2rad([7.5 5 -2]);
 
 % Load ACPC Brain
 preop_T1_acpc = loadNifTi([subDir,filesep,'Processed',filesep,'anat_t1_acpc.nii']);
@@ -60,7 +76,7 @@ AtlasController(AtlasInfo, AtlasPatch);
 
 % View Left Leads
 leftLeads = dir([subDir,filesep,'Processed',filesep,'LEAD_Left*']);
-for n = 2:length(leftLeads)
+for n = 1:length(leftLeads)
     leadInfo = load([subDir,filesep,'Processed',filesep,leftLeads(n).name]);
     [ elfv, modelType ] = constructElectrode( leadInfo );
     for section = 1:length(modelType)
