@@ -7,18 +7,18 @@ clear; clc; close all;
 if isempty(getenv('NEURO_VIS_PATH'))
     %check if the current path has 'LeadLocalization Pipeline' or if we are
     %already in that folder
-    if exist(fullfile(pwd,'LeadLocalization Pipeline'),'dir') == 7
-        NEURO_VIS_PATH = fullfile(pwd,'LeadLocalization Pipeline');
-    elseif endsWith(pwd,'LeadLocalization Pipeline')
+    if exist(fullfile(pwd,'LeadLocalization'),'dir') == 7
+        NEURO_VIS_PATH = fullfile(pwd,'LeadLocalization');
+    elseif endsWith(pwd,'LeadLocalization')
         NEURO_VIS_PATH = pwd;
     else
         %prompt user to select LeadLocalization Pipeline
-        NEURO_VIS_PATH = uigetdir('','Please select the LeadLocaliaztion Pipeline folder');
+        NEURO_VIS_PATH = uigetdir('','Please select the LeadLocaliaztion folder');
     end
 
     %ensure path is correct
-    if ~endsWith(NEURO_VIS_PATH,'LeadLocalization Pipeline')
-        msgbox('Failed to select LeadLocalization Pipeline folder');
+    if ~endsWith(NEURO_VIS_PATH,'LeadLocalization')
+        msgbox('Failed to select LeadLocalization folder');
         return
     end
     
