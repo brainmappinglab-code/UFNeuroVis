@@ -26,9 +26,9 @@ BOVATransformation.Right.Scale = [1 0.95 0.98];
 BOVATransformation.Right.Rotation = deg2rad([8 -2 -1]);
 
 %Ramirez ZI patient
-BOVATransformation.Left.Translation = [1.5 -1.25 2];
-BOVATransformation.Left.Scale = [0.95 0.95 0.9];
-BOVATransformation.Left.Rotation = deg2rad([2 9.5 -1]);
+BOVATransformation.Left.Translation = [-1.25 -1.5 2];
+BOVATransformation.Left.Scale = [0.94 0.93 0.9];
+BOVATransformation.Left.Rotation = deg2rad([9.5 2 -1]);
 BOVATransformation.Right.Translation = [-1 1 0.5];
 BOVATransformation.Right.Scale = [0.94 0.93 0.9];
 BOVATransformation.Right.Rotation = deg2rad([7.5 5 -2]);
