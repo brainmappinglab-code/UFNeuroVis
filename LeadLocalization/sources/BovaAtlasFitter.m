@@ -877,8 +877,11 @@ function selectExistingTransformationButton_Callback(hObject, eventdata, handles
 function Out = getLeftCons(M)
     if isfield(M,'scaleleft') && isfield(M,'mvmtleft') && isfield(M,'rotationleft')
         Out.scale = M.scaleleft;
+        Out.scale = [Out.scale(2) Out.scale(1) Out.scale(3)];
         Out.translation = M.mvmtleft;
+        Out.translation = [Out.translation(2) Out.translation(1) Out.translation(3)];
         Out.rotation = M.rotationleft;
+        Out.rotation = [Out.rotation(2) Out.rotation(1) Out.rotation(3)];
     else
        Out = getEmptyTransformation();
     end
@@ -891,8 +894,11 @@ function Out = getLeftCons(M)
 function Out = getRightCons(M)
     if isfield(M,'scaleright') && isfield(M,'mvmtright') && isfield(M,'rotationright')
         Out.scale = M.scaleright;
+        Out.scale = [Out.scale(2) Out.scale(1) Out.scale(3)];
         Out.translation = M.mvmtright;
+        Out.translation = [Out.translation(2) Out.translation(1) Out.translation(3)];
         Out.rotation = M.rotationright;
+        Out.rotation = [Out.rotation(2) Out.rotation(1) Out.rotation(3)];
     else
        Out = getEmptyTransformation();
     end
