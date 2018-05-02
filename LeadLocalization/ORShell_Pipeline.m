@@ -48,17 +48,17 @@ Processed_DIR = [Patient_DIR,filesep,'Processed'];
 mkdir(Processed_DIR);
 
 %% Step 1: Convert Knwon Image from UF VTK format to NifTi format
-if exist('mr','file') && ~exist([Processed_DIR,filesep,'anat_t1.nii'],'file');
+if exist('mr','file') && ~exist([Processed_DIR,filesep,'anat_t1.nii'],'file')
     preop_T1 = UFVTK2NifTi('mr');
 	save_nii(preop_T1,[Processed_DIR,filesep,'anat_t1.nii']);
 end
 
-if exist('ct','file') && ~exist([Processed_DIR,filesep,'preop_ct.nii'],'file');
+if exist('ct','file') && ~exist([Processed_DIR,filesep,'preop_ct.nii'],'file')
     postop_CT = UFVTK2NifTi('ct');
 	save_nii(postop_CT,[Processed_DIR,filesep,'preop_ct.nii']);
 end
 
-if exist('mr2','file') && ~exist([Processed_DIR,filesep,'anat_t2.nii'],'file');
+if exist('mr2','file') && ~exist([Processed_DIR,filesep,'anat_t2.nii'],'file')
     preop_T2 = UFVTK2NifTi('mr2');
 	save_nii(preop_T2,[Processed_DIR,filesep,'anat_t2.nii']);
 end
