@@ -89,7 +89,7 @@ else
 	fprintf('MRI Upsampling to 0.5mm spacing complete.\n');
 	
 	% Spatial Filtering
-	preop_T1_filtered = spatialFilter(preop_T1_upsampled, 'diffusion');
+	preop_T1_filtered = spatialFilter(preop_T1_upsampled, 'none');
 	save_nii(preop_T1_filtered,[Processed_DIR,filesep,'anat_t1_filtered.nii']);
 	preop_T1 = preop_T1_filtered;
 	fprintf('MRI Spatial Filter with Diffusion Filter complete.\n');

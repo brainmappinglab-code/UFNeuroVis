@@ -28,4 +28,6 @@ switch method
                 outputImage.img(:,:,k) = imbilatfilt(NifTi.img(:,:,k));
             end
         end
+    otherwise
+        disp('No Filter Used');
 end
