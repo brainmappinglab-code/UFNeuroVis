@@ -50,7 +50,9 @@ setappdata(handles.figure1,'Updating',false);
 z = zoom(handles.figure1);
 set(z,'ActionPostCallback',{@zoomIn,handles});
 
-atlasDir = '\\gunduz-lab.bme.ufl.edu\Data\BOVA_Atlas\lh';
+setappdata(handles.figure1,'NeuroVisPath',varargin{3});
+
+atlasDir = [getappdata(handles.figure1,'NeuroVisPath'),filesep,'atlasModels',filesep,'UF Anatomical Models',filesep,'lh'];%'\\gunduz-lab.bme.ufl.edu\Data\BOVA_Atlas\lh';
 allAtlas = dir([atlasDir,filesep,'*.nii']);
 disp('Loading atlas...')
 for n = 1:length(allAtlas)
@@ -65,6 +67,7 @@ setappdata(handles.figure1,'atlasThreshold',0.4);
 if ~isempty(varargin)
     InitNiftiFromNifti(handles,varargin{1});
     setappdata(handles.figure1,'ProcessedDir',varargin{2});
+    %NOTE, varargin{3} used above
     
     %look for crw
     updateLeadPlannedPopup(handles);
@@ -919,7 +922,7 @@ function Out = getEmptyTransformation()
     
 function leftCheckbox_Callback(hObject, eventdata, handles)
     setappdata(handles.figure1,'Side','L');
-    atlasDir = '\\gunduz-lab.bme.ufl.edu\Data\BOVA_Atlas\lh';
+    atlasDir = [getappdata(handles.figure1,'NeuroVisPath'),filesep,'atlasModels',filesep,'UF Anatomical Models',filesep,'lh']; %'\\gunduz-lab.bme.ufl.edu\Data\BOVA_Atlas\lh';
     allAtlas = dir([atlasDir,filesep,'*.nii']);
     disp('Loading atlas...')
     for n = 1:length(allAtlas)
@@ -936,7 +939,7 @@ function leftCheckbox_Callback(hObject, eventdata, handles)
     
 function rightCheckbox_Callback(hObject, eventdata, handles)
     setappdata(handles.figure1,'Side','R');
-    atlasDir = '\\gunduz-lab.bme.ufl.edu\Data\BOVA_Atlas\rh';
+    atlasDir = [getappdata(handles.figure1,'NeuroVisPath'),filesep,'atlasModels',filesep,'UF Anatomical Models',filesep,'rh'];%'\\gunduz-lab.bme.ufl.edu\Data\BOVA_Atlas\rh';
     allAtlas = dir([atlasDir,filesep,'*.nii']);
     disp('Loading atlas...')
     for n = 1:length(allAtlas) %

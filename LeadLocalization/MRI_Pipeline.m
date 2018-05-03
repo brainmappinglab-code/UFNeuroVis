@@ -176,7 +176,7 @@ leadLocalization(preop_T1_acpc, coregistered_CT, Processed_DIR);
 
 %% Step 7: Normalization based on patient morph
 preop_T1_acpc = loadNifTi([Processed_DIR,filesep,'anat_t1_acpc.nii']);
-BovaAtlasFitter(preop_T1_acpc,Processed_DIR);
+BovaAtlasFitter(preop_T1_acpc,Processed_DIR,NEURO_VIS_PATH);
 
 %% Step 8: Get BOVA Atlas Transformation Matrix
 Patient_BOVA_DIR = uigetdir('\\gunduz-lab.bme.ufl.edu\Data\DBSArch','Please select the subject Folder');
