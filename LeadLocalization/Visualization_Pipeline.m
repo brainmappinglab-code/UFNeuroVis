@@ -1,3 +1,147 @@
+%% Get LeadLocalization Pipeline path
+
+%if environmental variable is already set, use it, otherwise reinitialize
+if isempty(getenv('NEURO_VIS_PATH'))
+    %check if the current path has 'LeadLocalization Pipeline' or if we are
+    %already in that folder
+    if exist(fullfile(pwd,'LeadLocalization'),'dir') == 7
+        NEURO_VIS_PATH = fullfile(pwd,'LeadLocalization');
+    elseif endsWith(pwd,'LeadLocalization')
+        NEURO_VIS_PATH = pwd;
+    else
+        %prompt user to select LeadLocalization Pipeline
+        NEURO_VIS_PATH = uigetdir('','Please select the LeadLocaliaztion folder');
+    end
+
+    %ensure path is correct
+    if ~endsWith(NEURO_VIS_PATH,'LeadLocalization')
+        msgbox('Failed to select LeadLocalization folder');
+        return
+    end
+    
+    setenv('NEURO_VIS_PATH',NEURO_VIS_PATH);
+else
+    NEURO_VIS_PATH=getenv('NEURO_VIS_PATH');
+end
+
+% Add Path
+addpath(genpath(NEURO_VIS_PATH))
+
+
+%% Step 0: Setups
+Patient_DIR = uigetdir('','Please select the subject Folder');
+if isnumeric(Patient_DIR) 
+    error('No folder selected');
+else
+    DICOM_Directory = dir([Patient_DIR,filesep,'DICOMDIR']);
+    if isempty(DICOM_Directory)
+        error('Incorrect Patient Directory');
+    end
+end
+fprintf('Change directory to patient directory...');
+cd(Patient_DIR);
+fprintf('Done\n\n');
+
+MRIFILTERED = false;
+CTFILTERED = false;
+TRANSFORMED = false;
+COREGISTERED = false;
+
+NifTi_DIR = [Patient_DIR,filesep,'NiiX'];
+Processed_DIR = [Patient_DIR,filesep,'Processed'];
+
+%% GET BOVA TRANSFORM
+
+BovaFits = dir([Processed_DIR,filesep,'BOVAFit_*']);
+if isempty(BovaFits)
+    option1 = 'Select patient folder from UF';
+    option2 = 'Cancel';
+    answer = questdlg('No BOVAFits located for this patient. What would you like to do?',...
+                      'Please Respond',...
+                      option1,option2,option2);
+    switch answer
+        case option1
+            Patient_BOVA_DIR = uigetdir('\\gunduz-lab.bme.ufl.edu\Data\DBSArch','Please select the subject Folder');
+            if isnumeric(Patient_BOVA_DIR) 
+                error('No folder selected');
+            else
+                FMRISAVEDATA = dir([Patient_BOVA_DIR,filesep,'fmrisavedata.mat']);
+                if isempty(FMRISAVEDATA)
+                    error('Cannot find BOVA Transform Data');
+                end
+            end
+
+            FMRISAVEDATA = load([Patient_BOVA_DIR,filesep,'fmrisavedata.mat']);
+            m = matfile([Processed_DIR,filesep,'BOVAFit_PatientFolder.mat'], 'Writable', true);
+            if isfield(FMRISAVEDATA.savestruct,'rotationleft')
+                Left.Rotation = FMRISAVEDATA.savestruct.rotationleft;
+                Left.Translation = FMRISAVEDATA.savestruct.mvmtleft;
+                Left.Scale = FMRISAVEDATA.savestruct.scaleleft;
+                m.Left = Left;
+            end
+            if isfield(FMRISAVEDATA.savestruct,'rotationright')
+                Right.Rotation = FMRISAVEDATA.savestruct.rotationright;
+                Right.Translation = FMRISAVEDATA.savestruct.mvmtright;
+                Right.Scale = FMRISAVEDATA.savestruct.scaleright;
+                m.Right = Right;
+            end
+            clear Left Right;
+
+            BovaTransform = load([Processed_DIR,filesep,'BOVAFit_PatientFolder.mat']);
+
+            % Transform Left Lead if Left Atlas Morph Exist
+            if isfield(BovaTransform,'Left')
+                leftLeads = dir([Processed_DIR,filesep,'Left*']);
+                for n = 1:length(leftLeads)
+                    leadInfo = load([Processed_DIR,filesep,leftLeads(n).name]);
+                    T = computeTransformMatrix(BovaTransform.Left.Translation,BovaTransform.Left.Scale,BovaTransform.Left.Rotation);
+                    m = matfile([Processed_DIR,filesep,'BOVA_',leftLeads(n).name],'Writable',true);
+                    m.Side = leadInfo.Side;
+                    m.Type = leadInfo.Type;
+                    m.nContacts = leadInfo.nContacts;
+                    newDistal = [leadInfo.Distal, 1] / T;
+                    m.Distal = newDistal(1:3);
+                    newProximal = [leadInfo.Proximal, 1] / T;
+                    m.Proximal = newProximal(1:3);
+                end
+            end
+
+            % Transform Right Lead if Right Atlas Morph Exist
+            if isfield(BovaTransform,'Right')
+                rightLeads = dir([Processed_DIR,filesep,'Right*']);
+                for n = 1:length(rightLeads)
+                    leadInfo = load([Processed_DIR,filesep,rightLeads(n).name]);
+                    T = computeTransformMatrix(BovaTransform.Right.Translation,BovaTransform.Right.Scale,BovaTransform.Right.Rotation);
+                    m = matfile([Processed_DIR,filesep,'BOVA_',rightLeads(n).name],'Writable',true);
+                    m.Side = leadInfo.Side;
+                    m.Type = leadInfo.Type;
+                    m.nContacts = leadInfo.nContacts;
+                    newDistal = [leadInfo.Distal, 1] / T;
+                    m.Distal = newDistal(1:3);
+                    newProximal = [leadInfo.Proximal, 1] / T;
+                    m.Proximal = newProximal(1:3);
+                end
+            end
+            
+            BOVATransformation = load([Processed_Dir,filesep,'BOVAFit_PatientFolder.mat']);
+            BOVATransformationName = 'PatientFolder';
+
+        case option2
+            return;
+    end
+else
+    %then we have BOVAFits to use
+    ToUse = BovaFits(1); %just grab the first one for now
+    BOVATransformation = load([ToUse.folder,filesep,ToUse.name]);
+    
+    %find name of bova transformation coming after BOVAFit_
+    UnderscoreInd = find(ToUse.name=='_');
+    PeriodInd = find(ToUse.name=='.');
+    BOVATransformationName = ToUse.name((UnderscoreInd+1):(PeriodInd-1));
+    
+    disp(['Loaded BOVAFit: ',ToUse.name]);
+end
+
 %% Setup
 MetalLead = [0.7 0.7 0.7];
 InsulationColor = [1,0,0];
@@ -8,38 +152,34 @@ if ~PlotLead
 end
 
 % Get Subject Directory
-subDir = uigetdir('','Please Select the subject for visualization');
-if ~exist([subDir,filesep,'Processed',filesep,'anat_t1_acpc.nii'],'file') || ~exist([subDir,filesep,'Processed',filesep,'BOVAFit.mat'],'file')
+if ~exist([subDir,filesep,'Processed',filesep,'anat_t1_acpc.nii'],'file')
     error('Cannot find ACPC, did you complete MRI_Pipeline?');
 end
-cd(subDir);
-
-% Import BOVA Atlas Fit
-%BOVATransformation = load([subDir,filesep,'Processed',filesep,'BOVAFit.mat']);
 
 %Chauncey Wissam patient
-BOVATransformation.Left.Translation = [-4 -2 0];
-BOVATransformation.Left.Scale = [1 0.95 0.98];
-BOVATransformation.Left.Rotation = deg2rad([6 6 -3]);
-BOVATransformation.Right.Translation = [-2 1 4];
-BOVATransformation.Right.Scale = [1 0.95 0.98];
-BOVATransformation.Right.Rotation = deg2rad([8 -2 -1]);
+%BOVATransformation.Left.Translation = [-4 -2 0];
+%BOVATransformation.Left.Scale = [1 0.95 0.98];
+%BOVATransformation.Left.Rotation = deg2rad([6 6 -3]);
+%BOVATransformation.Right.Translation = [-2 1 4];
+%BOVATransformation.Right.Scale = [1 0.95 0.98];
+%BOVATransformation.Right.Rotation = deg2rad([8 -2 -1]);
 
 %Ramirez ZI patient
-BOVATransformation.Left.Translation = [-1.25 -1.5 2];
-BOVATransformation.Left.Scale = [0.94 0.93 0.9];
-BOVATransformation.Left.Rotation = deg2rad([9.5 2 -1]);
-BOVATransformation.Right.Translation = [-1 1 0.5];
-BOVATransformation.Right.Scale = [0.94 0.93 0.9];
-BOVATransformation.Right.Rotation = deg2rad([7.5 5 -2]);
+%BOVATransformation.Left.Translation = [-1.25 -1.5 2];
+%BOVATransformation.Left.Scale = [0.94 0.93 0.9];
+%BOVATransformation.Left.Rotation = deg2rad([9.5 2 -1]);
+%BOVATransformation.Right.Translation = [-1 1 0.5];
+%BOVATransformation.Right.Scale = [0.94 0.93 0.9];
+%BOVATransformation.Right.Rotation = deg2rad([7.5 5 -2]);
 
 % Load ACPC Brain
 preop_T1_acpc = loadNifTi([subDir,filesep,'Processed',filesep,'anat_t1_acpc.nii']);
 
 %% Choose Atlas
-atlasDir = uigetdir('\\gunduz-lab.bme.ufl.edu\Data\','Please Select the atlas directory for visualization');
+%atlasDir = uigetdir('\\gunduz-lab.bme.ufl.edu\Data\','Please Select the atlas directory for visualization');
+atlasDir = [NEURO_VIS_PATH,filesep,'atlasModels',filesep,'UF Anatomical Models']; 
 [atlasDir,atlasName] = fileparts(atlasDir);
-if ~exist([subDir,filesep,'Processed',filesep,atlasName,'_STL.mat'],'file')
+if ~exist([subDir,filesep,'Processed',filesep,atlasName,'_STL_',BOVATransformationName,'.mat'],'file')
     if isfield(BOVATransformation,'Left')
         T = computeTransformMatrix(BOVATransformation.Left.Translation,BOVATransformation.Left.Scale,BOVATransformation.Left.Rotation);
         tform = affine3d(T);
@@ -50,10 +190,10 @@ if ~exist([subDir,filesep,'Processed',filesep,atlasName,'_STL.mat'],'file')
         tform = affine3d(T);
         [AtlasSTL.Right, AtlasInfo.Right] = atlas2STL([atlasDir,filesep,atlasName,filesep,'rh'],tform);
     end
-    save([subDir,filesep,'Processed',filesep,atlasName,'_STL.mat'],'AtlasSTL','AtlasInfo');
+    save([subDir,filesep,'Processed',filesep,atlasName,'_STL_',BOVATransformationName,'.mat'],'AtlasSTL','AtlasInfo');
 end
 
-load([subDir,filesep,'Processed',filesep,atlasName,'_STL.mat'],'AtlasSTL','AtlasInfo');
+load([subDir,filesep,'Processed',filesep,atlasName,'_STL_',BOVATransformationName,'.mat'],'AtlasSTL','AtlasInfo');
 
 %% Visualization
 % Setup Figure
