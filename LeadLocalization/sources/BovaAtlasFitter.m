@@ -945,6 +945,11 @@ function Out = getEmptyTransformation()
     Out.rotation = [0 0 0];
     
 function leftCheckbox_Callback(hObject, eventdata, handles)
+    
+    if handles.leftCheckbox.Value==1 && strcmp(getappdata(handles.figure1,'Side'),'R')
+        handles.existingTransformationText.String = '...';
+    end
+    
     setappdata(handles.figure1,'Side','L');
     atlasDir = [getappdata(handles.figure1,'NeuroVisPath'),filesep,'atlasModels',filesep,'UF Anatomical Models',filesep,'lh']; %'\\gunduz-lab.bme.ufl.edu\Data\BOVA_Atlas\lh';
     allAtlas = dir([atlasDir,filesep,'*.nii']);
@@ -962,6 +967,11 @@ function leftCheckbox_Callback(hObject, eventdata, handles)
     guidata(hObject, handles);
     
 function rightCheckbox_Callback(hObject, eventdata, handles)
+    
+    if handles.rightCheckbox.Value==1 && strcmp(getappdata(handles.figure1,'Side'),'L')
+        handles.existingTransformationText.String = '...';
+    end
+    
     setappdata(handles.figure1,'Side','R');
     atlasDir = [getappdata(handles.figure1,'NeuroVisPath'),filesep,'atlasModels',filesep,'UF Anatomical Models',filesep,'rh'];%'\\gunduz-lab.bme.ufl.edu\Data\BOVA_Atlas\rh';
     allAtlas = dir([atlasDir,filesep,'*.nii']);
