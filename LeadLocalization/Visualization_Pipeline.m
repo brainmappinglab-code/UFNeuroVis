@@ -83,6 +83,13 @@ if isempty(BovaFits)
                 Right.Rotation = FMRISAVEDATA.savestruct.rotationright;
                 Right.Translation = FMRISAVEDATA.savestruct.mvmtright;
                 Right.Scale = FMRISAVEDATA.savestruct.scaleright;
+                
+                %if we chose from patient folder, we need to adjust the
+                %values for the right side: flip the x for translation and
+                %the rotation for y before saving the data to BOVAFit
+                Right.Translation(1) = Right.Translation(1)*-1;
+                Right.Rotation(2) = Right.Rotation(2)*-1;
+                
                 m.Right = Right;
             end
             clear Left Right;

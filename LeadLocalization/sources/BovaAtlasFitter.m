@@ -21,16 +21,7 @@ set(handles.figure1,'WindowButtonMotionFcn',{@mouseMove,handles});
 set(handles.figure1,'WindowButtonDownFcn',{@mouseClick,handles});
 set(handles.figure1,'WindowKeyPressFcn',{@keyPress,handles});
 set(handles.figure1,'WindowScrollWheelFcn', {@wheelScrolled,handles});
-
-%set transformation constants
-Cons.rotation = [0 0 0];
-Cons.scale = [1 1 1];
-Cons.translation = [0 0 0];
-Cons.included = {};
-setappdata(handles.figure1,'TransformationConstants',Cons);
     
-setappdata(handles.figure1,'TransformationConstantsPath','C:\Users\eisinger\Documents\CT_MRI_Analysis\Bova\Transformations\');
-
 %set some temp values
 setappdata(handles.figure1,'XInd',293); %293
 setappdata(handles.figure1,'YInd',307); %307
@@ -129,12 +120,32 @@ function UpdateDefaultLimits(handles)
     setappdata(handles.figure1,'XLim',GetDefaultLim(handles));
     setappdata(handles.figure1,'YLim',GetDefaultLim(handles));
     setappdata(handles.figure1,'ZLim',GetDefaultLim(handles));    
+
+function Out = UpdateTranslationBasedOnLaterality(handles,translation)
+    Out = translation;
+    if handles.rightCheckbox.Value == 1
+       Out(1) = -1*Out(1); %if we are on the right side, a negative shift means away from the midline, which mathematically is actually a positive number
+    end
+function Out = UpdateRotationBasedOnLaterality(handles,rotation)  
+    Out = rotation;
+    if handles.rightCheckbox.Value == 1
+        Out(2) = -1*Out(2); %if we are on the right side, the rotation that occurs is actually flipped for y dimension
+    end
+    
+function Out = getConsFromTextboxes(handles)
+    Out.rotation = [str2num(handles.xRotateTextbox.String),str2num(handles.yRotateTextbox.String),str2num(handles.zRotateTextbox.String)];
+    Out.translation = [str2num(handles.xTranslateTextbox.String),str2num(handles.yTranslateTextbox.String),str2num(handles.zTranslateTextbox.String)];
+    Out.scale = [str2num(handles.xScaleTextbox.String),str2num(handles.yScaleTextbox.String),str2num(handles.zScaleTextbox.String)];
     
 function TransformAtlas(handles)
-    Cons = getappdata(handles.figure1,'TransformationConstants');
+    Cons = getConsFromTextboxes(handles);
     Rotation = deg2rad(Cons.rotation); %convert to radians
     Scale = Cons.scale;
     Translation = Cons.translation;
+    
+    %UPDATE BASED ON LATERALITY
+    Translation = UpdateTranslationBasedOnLaterality(handles,Translation);
+    Rotation = UpdateRotationBasedOnLaterality(handles,Rotation);
     
     xRot = [1 0 0 0; 0 cos(Rotation(1)) -sin(Rotation(1)) 0; 0 sin(Rotation(1)) cos(Rotation(1)) 0; 0 0 0 1];
     yRot = [cos(Rotation(2)) 0 sin(Rotation(2)) 0; 0 1 0 0; -sin(Rotation(2)) 0 cos(Rotation(2)) 0; 0 0 0 1];
@@ -660,9 +671,6 @@ end
 
 
 function xRotateTextbox_Callback(hObject, eventdata, handles)
-    Cons = getappdata(handles.figure1,'TransformationConstants');
-    Cons.rotation(1) = str2num(handles.xRotateTextbox.String);
-    setappdata(handles.figure1,'TransformationConstants',Cons);
     TransformAtlas(handles);
     updatePlots(handles);
 
@@ -688,9 +696,6 @@ end
 
 
 function yRotateTextbox_Callback(hObject, eventdata, handles)
-    Cons = getappdata(handles.figure1,'TransformationConstants');
-    Cons.rotation(2) = str2num(handles.yRotateTextbox.String);
-    setappdata(handles.figure1,'TransformationConstants',Cons);
     TransformAtlas(handles);
     updatePlots(handles);
 
@@ -702,9 +707,6 @@ end
 
 
 function zRotateTextbox_Callback(hObject, eventdata, handles)
-    Cons = getappdata(handles.figure1,'TransformationConstants');
-    Cons.rotation(3) = str2num(handles.zRotateTextbox.String);
-    setappdata(handles.figure1,'TransformationConstants',Cons);
     TransformAtlas(handles);    
     updatePlots(handles);
 
@@ -716,9 +718,6 @@ end
 
 
 function xScaleTextbox_Callback(hObject, eventdata, handles)
-    Cons = getappdata(handles.figure1,'TransformationConstants');
-    Cons.scale(1) = str2num(handles.xScaleTextbox.String);
-    setappdata(handles.figure1,'TransformationConstants',Cons);
     TransformAtlas(handles);
     updatePlots(handles);
 
@@ -730,9 +729,6 @@ end
 
 
 function yScaleTextbox_Callback(hObject, eventdata, handles)
-    Cons = getappdata(handles.figure1,'TransformationConstants');
-    Cons.scale(2) = str2num(handles.yScaleTextbox.String);
-    setappdata(handles.figure1,'TransformationConstants',Cons);
     TransformAtlas(handles);
     updatePlots(handles);
 
@@ -744,9 +740,6 @@ end
 
 
 function zScaleTextbox_Callback(hObject, eventdata, handles)
-    Cons = getappdata(handles.figure1,'TransformationConstants');
-    Cons.scale(3) = str2num(handles.zScaleTextbox.String);
-    setappdata(handles.figure1,'TransformationConstants',Cons);
     TransformAtlas(handles);
     updatePlots(handles);
 
@@ -758,9 +751,6 @@ end
 
 
 function xTranslateTextbox_Callback(hObject, eventdata, handles)
-    Cons = getappdata(handles.figure1,'TransformationConstants');
-    Cons.translation(1) = str2num(handles.xTranslateTextbox.String);
-    setappdata(handles.figure1,'TransformationConstants',Cons);
     TransformAtlas(handles);
     updatePlots(handles);
     
@@ -772,9 +762,6 @@ end
 
 
 function yTranslateTextbox_Callback(hObject, eventdata, handles)
-    Cons = getappdata(handles.figure1,'TransformationConstants');
-    Cons.translation(2) = str2num(handles.yTranslateTextbox.String);
-    setappdata(handles.figure1,'TransformationConstants',Cons);
     TransformAtlas(handles);
     updatePlots(handles);
 
@@ -787,9 +774,6 @@ end
 
 
 function zTranslateTextbox_Callback(hObject, eventdata, handles)
-    Cons = getappdata(handles.figure1,'TransformationConstants');
-    Cons.translation(3) = str2num(handles.zTranslateTextbox.String);
-    setappdata(handles.figure1,'TransformationConstants',Cons);
     TransformAtlas(handles);
     updatePlots(handles);
 
@@ -799,7 +783,7 @@ if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgr
 end
 
 function fillTransformationTextboxesWithCons(handles,Cons)   
-     handles.xRotateTextbox.String = Cons.rotation(1);
+    handles.xRotateTextbox.String = Cons.rotation(1);
     handles.yRotateTextbox.String = Cons.rotation(2);
     handles.zRotateTextbox.String = Cons.rotation(3);
     handles.xScaleTextbox.String = Cons.scale(1);
@@ -808,7 +792,6 @@ function fillTransformationTextboxesWithCons(handles,Cons)
     handles.xTranslateTextbox.String = Cons.translation(1);
     handles.yTranslateTextbox.String = Cons.translation(2);
     handles.zTranslateTextbox.String = Cons.translation(3);    
-     setappdata(handles.figure1,'TransformationConstants',Cons);
     TransformAtlas(handles);
     updatePlots(handles);
 
@@ -844,9 +827,13 @@ function ZICheckbox_Callback(hObject, eventdata, handles)
     updatePlots(handles);
     
 function selectExistingTransformationButton_Callback(hObject, eventdata, handles)
-    %out = uigetdir('\\gunduz-lab.bme.ufl.edu\Data\DBSArch\','Select Patient Folder');
-    out = uigetdir('\\gunduz-lab.bme.ufl.edu\Lab\Robert\Filan\','Select Patient Folder');
     
+    %when we load from the DBSArch fmrisaveddata.mat structure, fill the
+    %textboxes directly in with the values, and then when we call the function fillTransformationTextboxesWithCons
+    %that function calls TransformAtlas which will then negate the
+    %appropriate values if we are on the right side of the brain
+    
+    out = uigetdir('\\gunduz-lab.bme.ufl.edu\Data\DBSArch\','Select Patient Folder');    
     tr = fullfile(out,'fmrisavedata.mat');
     if exist(tr,'file')
        M = load(tr); 
@@ -876,6 +863,43 @@ function selectExistingTransformationButton_Callback(hObject, eventdata, handles
            end
        end
     end
+
+function selectBOVAFitMorph_Callback(hObject, eventdata, handles)
+    [one,two] = uigetfile('./BOVAFit*');
+    Co = load(fullfile(two,one));
+    
+    
+    if handles.rightCheckbox.Value == 1
+        
+        Cons.rotation = Co.Right.Rotation;
+        Cons.translation = Co.Right.Translation;
+        Cons.scale = Co.Right.Scale;
+        
+        %if we are on the right side, then negate the actual values that are
+        %stored in BOVAFit for display purposes, but then when the
+        %TransformAtlas function is called down below then the values will get
+        %re-negated back to their original, actual, values that are loaded here
+        UpdateTranslationBasedOnLaterality(handles,Cons.translation);
+        UpdateRotationBasedOnLaterality(handles,Cons.rotation);
+    elseif handles.leftCheckbox.Value == 1
+        Cons.rotation = Co.Left.Rotation;
+        Cons.translation = Co.Left.Translation;
+        Cons.scale = Co.Left.Scale;
+    end
+    
+    
+    handles.xRotateTextbox.String = Cons.rotation(1);
+    handles.yRotateTextbox.String = Cons.rotation(2);
+    handles.zRotateTextbox.String = Cons.rotation(3);
+    handles.xScaleTextbox.String = Cons.scale(1);
+    handles.yScaleTextbox.String = Cons.scale(2);
+    handles.zScaleTextbox.String = Cons.scale(3);
+    handles.xTranslateTextbox.String = Cons.translation(1);
+    handles.yTranslateTextbox.String = Cons.translation(2);
+    handles.zTranslateTextbox.String = Cons.translation(3);    
+    TransformAtlas(handles);
+    updatePlots(handles);
+    
     
 function Out = getLeftCons(M)
     if isfield(M,'scaleleft') && isfield(M,'mvmtleft') && isfield(M,'rotationleft')
@@ -1041,6 +1065,95 @@ end
 
 % --- Executes on button press in saveAsButton.
 function saveAsButton_Callback(hObject, eventdata, handles)
-% hObject    handle to saveAsButton (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
+    Rotation = [str2num(handles.xRotateTextbox.String),str2num(handles.yRotateTextbox.String),str2num(handles.zRotateTextbox.String)];
+    Translation = [str2num(handles.xTranslateTextbox.String),str2num(handles.yTranslateTextbox.String),str2num(handles.zTranslateTextbox.String)];
+    Scale = [str2num(handles.xScaleTextbox.String),str2num(handles.yScaleTextbox.String),str2num(handles.zScaleTextbox.String)];
+    
+    prompt = {'Enter name of BOVAFit (e.g., myFit)'};
+    title = 'Name';
+    definput = {'myFit'};
+    answer = inputdlg(prompt,title,[1 40],definput);
+    
+    name = fullfile([getappdata(handles.figure1,'ProcessedDir'),filesep,'BOVAFit_',answer{1},'.mat']);
+    if exist(name,'file')
+        M = load(name);
+        if handles.leftCheckbox.Value == 1 && isfield(M,'Left')
+            option1 = 'Override';
+            option2 = 'Cancel';
+            answer = questdlg('There is already a BOVAFit with that name with left morph values.',...
+                      'Please Respond',...
+                      option1,option2,option2);
+            switch answer
+                case option1
+                   Left.Rotation = Rotation;
+                   Left.Translation = Translation;
+                   Left.Scale = Scale;
+                   if isfield(M,'Right')
+                       Right = M.Right;
+                       save(name,'Left','Right');
+                   else
+                    save(name,'Left');
+                   end
+                   msgbox('Saved the Left side');
+                case option2
+                    return;
+            end
+        elseif handles.leftCheckbox.Value == 1 && isfield(M,'Right') && ~isfield(M,'Left')
+            Left.Rotation = Rotation;
+            Left.Translation = Translation;
+            Left.Scale = Scale;
+            Right = M.Right;
+            save(name,'Left','Right');
+            msgbox('Saved the Left side');
+        elseif handles.rightCheckbox.Value == 1 && isfield(M,'Right')
+            option1 = 'Override';
+            option2 = 'Cancel';
+            answer = questdlg('There is already a BOVAFit with that name with right morph values.',...
+                      'Please Respond',...
+                      option1,option2,option2);
+            switch answer
+                case option1
+                   Right.Rotation = Rotation;
+                   Right.Translation = Translation;
+                   Right.Scale = Scale;
+                   if isfield(M,'Left')
+                       Left = M.Left;
+                       save(name,'Left','Right');
+                   else
+                    save(name,'Right');
+                   end
+                   msgbox('Saved the Right side');
+                case option2
+                    return;
+            end    
+        elseif handles.rightCheckbox.Value == 1 && isfield(M,'Left') && ~isfield(M,'Right')
+            Right.Rotation = Rotation;
+            Right.Translation = Translation;
+            Right.Scale = Scale;
+            Left = M.Left;
+            save(name,'Left','Right');
+            msgbox('Saved the Right side');
+        end
+    else
+        
+        if handles.leftCheckbox.Value == 1
+           Left.Rotation = Rotation;
+           Left.Translation = Translation;
+           Left.Scale = Scale;
+           save(name,'Left');
+           msgbox('Saved the Left side');
+        elseif handles.rightCheckbox.Value == 1
+            %if right side selected, update to the actual values before
+            %saving by negating the proper values
+            Right.Rotation = UpdateRotationBasedOnLaterality(handles,Rotation);
+            Right.Translation = UpdateTranslationBasedOnLaterality(handles,Translation);
+            Right.Scale = Scale;
+            save(name,'Right');
+            msgbox('Saved the right side');
+        end
+
+    end
+    
+    
+
+
