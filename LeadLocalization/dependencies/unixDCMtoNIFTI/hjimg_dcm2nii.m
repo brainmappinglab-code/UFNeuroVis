@@ -1,5 +1,7 @@
 function hjimg_dcm2nii(Patient_DIR, NifTi_DIR)
-    %matlab wrapper to call the DICOM to NifTi converter based on Unix tools
+    % matlab wrapper to call the DICOM to NifTi converter based on Unix tools
+    % It sorts through DICOM images without looking at the DICOMDIR, 
+    % reconstructing the info from the DICOM headers present in each image
     % Enrico Opri 2018
 
     if ~any(strcmp(Patient_DIR(end),{'\','/'}))
