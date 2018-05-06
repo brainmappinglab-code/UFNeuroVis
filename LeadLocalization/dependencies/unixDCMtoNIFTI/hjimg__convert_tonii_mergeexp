@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-# to convert the sorted dicoms in nifti
+# to convert the sorted dicoms in nifti, merging exposure (some centers may use varying exposure during CT)
 # first argument is the output folder, second argument is the input folder where the DICOMs were sorted 
 # (I kept a syntax similar to dcm2niix) 
 #   e.g. hjimg__convert_tonii niix DICOMSORT
@@ -39,8 +39,8 @@ for x in next(os.walk(source_fld))[1]:
     #this line crops the image
     #os.system("dcm2niix"+" -z n -x y -b n -o " + cwd + "/" + out_fld + " \""+cwd+"/"+ source_fld+"/"+x+"\"")
     #os.system("dcm2niix"+" -z n -b n -o " + cwd + "/" + out_fld + " \""+cwd+"/"+ source_fld+"/"+x+"\"")
-    os.system("dcm2niix"+" -z n -b n -o \"" + out_fld + "\" \"" + source_fld+"/"+x+"\"")
-    #os.system("dcm2niix"+" -z n -b n -m y -o \"" + out_fld + "\" \"" + source_fld+"/"+x+"\"")
+    #os.system("dcm2niix"+" -z n -b n -o \"" + out_fld + "\" \"" + source_fld+"/"+x+"\"")
+    os.system("dcm2niix"+" -z n -b n -m y -o \"" + out_fld + "\" \"" + source_fld+"/"+x+"\"")
 
 
 
