@@ -339,7 +339,14 @@ updateSlices(handles);
 
 function selectLeadType(hObject, eventdata)
 handles = guidata(hObject);
+name = hObject.String{hObject.Value};
 handles.leadlocalization.lead.type = hObject.String{hObject.Value};
+
+if strcmp(name,'medtronic_3387')
+    handles.leadlocalization.lead.nContacts = 4;
+else
+   error('We dont know how many contacts there are. Pleaese see leadLocalization.m selectLeadType function'); 
+end
 guidata(hObject, handles);
 
 function selectLeadSide(hObject, eventdata)

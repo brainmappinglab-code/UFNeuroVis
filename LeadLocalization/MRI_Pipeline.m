@@ -152,3 +152,6 @@ leadLocalization(preop_T1_acpc, coregistered_CT, Processed_DIR);
 preop_T1_acpc = loadNifTi([Processed_DIR,filesep,'anat_t1_acpc.nii']);
 BovaAtlasFitter(preop_T1_acpc,Processed_DIR,NEURO_VIS_PATH);
 
+%% Step 8: Consider, for each patient, to obtain volume information for analyses down the line
+% http://volbrain.upv.es/index.php
+
