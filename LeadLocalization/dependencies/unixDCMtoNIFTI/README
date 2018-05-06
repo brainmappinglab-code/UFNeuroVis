@@ -1,5 +1,11 @@
-#how to use
+##how to use
 
+#you can call the matlab wrapper
+hjimg_dcm2nii(Patient_DIR, NifTi_DIR)
+
+#you may need to run the hjimg_dcm2nii_install script only the fist time
+
+## details on the scripts used
 #to sort folder of dicoms (path after -D option) and put them in DICOMSORT folder (path after -o option)
  hjimg__dcmsort  -D IMAGES -o DICOMSORT
 

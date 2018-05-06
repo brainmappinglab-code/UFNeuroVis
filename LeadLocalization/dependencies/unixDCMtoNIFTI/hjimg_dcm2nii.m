@@ -1,4 +1,7 @@
 function hjimg_dcm2nii(Patient_DIR, NifTi_DIR)
+    %matlab wrapper to call the DICOM to NifTi converter based on Unix tools
+    % Enrico Opri 2018
+
     if ~any(strcmp(Patient_DIR(end),{'\','/'}))
         Patient_DIR = [Patient_DIR,''];
     end
