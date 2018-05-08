@@ -879,8 +879,9 @@ function selectBOVAFitMorph_Callback(hObject, eventdata, handles)
         %stored in BOVAFit for display purposes, but then when the
         %TransformAtlas function is called down below then the values will get
         %re-negated back to their original, actual, values that are loaded here
-        UpdateTranslationBasedOnLaterality(handles,Cons.translation);
-        UpdateRotationBasedOnLaterality(handles,Cons.rotation);
+        Cons.translation = UpdateTranslationBasedOnLaterality(handles,Cons.translation);
+        Cons.rotation = UpdateRotationBasedOnLaterality(handles,Cons.rotation);
+        
     elseif handles.leftCheckbox.Value == 1
         Cons.rotation = Co.Left.Rotation;
         Cons.translation = Co.Left.Translation;
