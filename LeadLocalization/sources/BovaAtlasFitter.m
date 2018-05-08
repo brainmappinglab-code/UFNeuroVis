@@ -68,6 +68,12 @@ else
     InitNiftiFromPath(handles,'C:\Users\eisinger\Documents\CT_MRI_Analysis\MNI\ACPC_T1_imwarp_origin000.nii');
 end
 
+%turn on all structures for now
+    structures = {'AC','CM','GPe','GPi','OT','Ru','SNr','STN','Str','Thal','Vc','Vim','Voa','Vop','ZI'};
+    for i=1:length(structures)
+        handles.([structures{i} 'Checkbox']).Value = ~handles.([structures{i} 'Checkbox']).Value;
+    end
+
 updatePlots(handles);
 
 guidata(hObject, handles);
@@ -1174,6 +1180,9 @@ function saveAsButton_Callback(hObject, eventdata, handles)
 
     end
     
-    
-
-
+function toggleAllButton_Callback(hObject, eventdata, handles)
+    structures = {'AC','CM','GPe','GPi','OT','Ru','SNr','STN','Str','Thal','Vc','Vim','Voa','Vop','ZI'};
+    for i=1:length(structures)
+        handles.([structures{i} 'Checkbox']).Value = ~handles.([structures{i} 'Checkbox']).Value;
+    end
+    updatePlots(handles);
