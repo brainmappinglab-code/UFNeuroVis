@@ -153,13 +153,13 @@ end
 %BOVATransformation.Right.Rotation = deg2rad([7.5 5 -2]);
 
 % Load ACPC Brain
-preop_T1_acpc = loadNifTi([subDir,filesep,'Processed',filesep,'anat_t1_acpc.nii']);
+preop_T1_acpc = loadNifTi([Processed_DIR,filesep,'anat_t1_acpc.nii']);
 
 %% Choose Atlas
 %atlasDir = uigetdir('\\gunduz-lab.bme.ufl.edu\Data\','Please Select the atlas directory for visualization');
 atlasDir = [NEURO_VIS_PATH,filesep,'atlasModels',filesep,'UF Anatomical Models']; 
 [atlasDir,atlasName] = fileparts(atlasDir);
-if ~exist([subDir,filesep,'Processed',filesep,atlasName,'_STL_',BOVATransformationName,'.mat'],'file')
+if ~exist([Processed_DIR,filesep,atlasName,'_STL_',BOVATransformationName,'.mat'],'file')
     if isfield(BOVATransformation,'Left')
         T = computeTransformMatrix(BOVATransformation.Left.Translation,BOVATransformation.Left.Scale,BOVATransformation.Left.Rotation);
         tform = affine3d(T);
@@ -170,10 +170,10 @@ if ~exist([subDir,filesep,'Processed',filesep,atlasName,'_STL_',BOVATransformati
         tform = affine3d(T);
         [AtlasSTL.Right, AtlasInfo.Right] = atlas2STL([atlasDir,filesep,atlasName,filesep,'rh'],tform);
     end
-    save([subDir,filesep,'Processed',filesep,atlasName,'_STL_',BOVATransformationName,'.mat'],'AtlasSTL','AtlasInfo');
+    save([Processed_DIR,filesep,atlasName,'_STL_',BOVATransformationName,'.mat'],'AtlasSTL','AtlasInfo');
 end
 
-load([subDir,filesep,'Processed',filesep,atlasName,'_STL_',BOVATransformationName,'.mat'],'AtlasSTL','AtlasInfo');
+load([Processed_DIR,filesep,atlasName,'_STL_',BOVATransformationName,'.mat'],'AtlasSTL','AtlasInfo');
 
 %% Visualization
 % Setup Figure
@@ -210,9 +210,9 @@ for n = 1:length(leftLeads)
 end
 
 % View Right Leads
-rightLeads = dir([subDir,filesep,'Processed',filesep,'LEAD_Right*']);
+rightLeads = dir([Processed_DIR,filesep,'LEAD_Right*']);
 for n = 1:length(rightLeads)
-    leadInfo = load([subDir,filesep,'Processed',filesep,rightLeads(n).name]);
+    leadInfo = load([Processed_DIR,filesep,rightLeads(n).name]);
     [ elfv, modelType ] = constructElectrode( leadInfo );
     for section = 1:length(modelType)
         if strcmpi(modelType(section),'contacts')
