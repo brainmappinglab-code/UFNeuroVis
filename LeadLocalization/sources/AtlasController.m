@@ -19,8 +19,8 @@ if isfield(AtlasInfo,'Left')
 end
 
 if isfield(AtlasInfo,'Right')
-    ButtonHeight = 0.9 / length(AtlasInfo.Left);
-    for n = 1:length(AtlasInfo.Left)
+    ButtonHeight = 0.9 / length(AtlasInfo.Right);
+    for n = 1:length(AtlasInfo.Right)
         handles.AtlasControl.Right(n) = uicontrol(handles.gui, 'Style','PushButton','String','',...
             'Units','Normalized','Position',[0.6 0.95-ButtonHeight*n 0.1 ButtonHeight*0.7],...
             'Callback',{@SelectColor, 'Right', n}, 'BackGroundColor', AtlasInfo.RightCMAP(n,:));
