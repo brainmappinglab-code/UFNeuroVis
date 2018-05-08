@@ -1001,12 +1001,17 @@ else
         handles.patientFolderText.ForegroundColor = [0 0 0];
         handles.mriText.String = 'anat_t1_acpc.nii';
         handles.mriText.ForegroundColor = [0 0 0];
-        InitNifti(handles,attempt);
+        InitNiftiFromPath(handles,attempt);
         updatePlots(handles);
     end
 end
 
-function pushbutton9_Callback(hObject, eventdata, handles)
+function loadImage_Callback(hObject, eventdata, handles)
+[ImageName,Path] = uigetfile([getappdata(handles.figure1,'ProcessedDir') filesep '*.nii']);
+handles.mriText.String = ImageName;
+InitNiftiFromPath(handles,fullfile(Path,ImageName));
+updatePlots(handles);
+
 
 
 
@@ -1123,8 +1128,8 @@ function saveAsButton_Callback(hObject, eventdata, handles)
                       option1,option2,option2);
             switch answer
                 case option1
-                   Right.Rotation = Rotation;
-                   Right.Translation = Translation;
+                   Right.Rotation = UpdateRotationBasedOnLaterality(handles,Rotation);
+                   Right.Translation = UpdateTranslationBasedOnLaterality(handles,Translation);
                    Right.Scale = Scale;
                    if isfield(M,'Left')
                        Left = M.Left;
@@ -1137,8 +1142,8 @@ function saveAsButton_Callback(hObject, eventdata, handles)
                     return;
             end    
         elseif handles.rightCheckbox.Value == 1 && isfield(M,'Left') && ~isfield(M,'Right')
-            Right.Rotation = Rotation;
-            Right.Translation = Translation;
+            Right.Rotation = UpdateRotationBasedOnLaterality(handles,Rotation);
+            Right.Translation = UpdateTranslationBasedOnLaterality(handles,Translation);
             Right.Scale = Scale;
             Left = M.Left;
             save(name,'Left','Right');
