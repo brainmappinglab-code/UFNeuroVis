@@ -448,8 +448,8 @@ function updatePlots(handles)
 
         CheckMouseOverPlots(handles);
         
-        structures = {'AC',   'CM',   'GPe',  'GPi', 'OT',   'Ru', 'SNr',  'STN','Str','Thal',  'Vc', 'Vim', 'Voa', 'Vop', 'ZI'};
-        colors =     {'black','black','green','blue','black','red','green','red','blue','green','red','black','blue','red','black'};
+        structures = {'AC',   'CM',   'GPe',  'GPi', 'OT',   'Ru', 'SNr',  'STN','Str','Thal',  'Vc',   'Vim',  'Voa', 'Vop', 'ZI'};
+        colors =     {'black','green','green','red','yellow','red','black','red','blue','green','green','green','green','green','black'};
         
         atlases = getappdata(handles.figure1,'atlases');
         MRIcenterDimensions = getappdata(handles.figure1,'MRIcenterDimensions');
