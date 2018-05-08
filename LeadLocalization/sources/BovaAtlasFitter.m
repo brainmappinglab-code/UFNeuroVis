@@ -867,39 +867,43 @@ function selectExistingTransformationButton_Callback(hObject, eventdata, handles
 function selectBOVAFitMorph_Callback(hObject, eventdata, handles)
     [one,two] = uigetfile('./BOVAFit*');
     Co = load(fullfile(two,one));
-    
-    
-    if handles.rightCheckbox.Value == 1
+    if ~isequal(one,0)
         
-        Cons.rotation = Co.Right.Rotation;
-        Cons.translation = Co.Right.Translation;
-        Cons.scale = Co.Right.Scale;
-        
-        %if we are on the right side, then negate the actual values that are
-        %stored in BOVAFit for display purposes, but then when the
-        %TransformAtlas function is called down below then the values will get
-        %re-negated back to their original, actual, values that are loaded here
-        Cons.translation = UpdateTranslationBasedOnLaterality(handles,Cons.translation);
-        Cons.rotation = UpdateRotationBasedOnLaterality(handles,Cons.rotation);
-        
-    elseif handles.leftCheckbox.Value == 1
-        Cons.rotation = Co.Left.Rotation;
-        Cons.translation = Co.Left.Translation;
-        Cons.scale = Co.Left.Scale;
+        handles.existingTransformationText.String = one(9:end); %file should be called BOVAFit_X where X is custom name, so chop of the BOVAFit part
+        handles.existingTransformationText.ForegroundColor = [0 0 0]; %change color to black
+
+        if handles.rightCheckbox.Value == 1
+
+            Cons.rotation = Co.Right.Rotation;
+            Cons.translation = Co.Right.Translation;
+            Cons.scale = Co.Right.Scale;
+
+            %if we are on the right side, then negate the actual values that are
+            %stored in BOVAFit for display purposes, but then when the
+            %TransformAtlas function is called down below then the values will get
+            %re-negated back to their original, actual, values that are loaded here
+            Cons.translation = UpdateTranslationBasedOnLaterality(handles,Cons.translation);
+            Cons.rotation = UpdateRotationBasedOnLaterality(handles,Cons.rotation);
+
+        elseif handles.leftCheckbox.Value == 1
+            Cons.rotation = Co.Left.Rotation;
+            Cons.translation = Co.Left.Translation;
+            Cons.scale = Co.Left.Scale;
+        end
+
+
+        handles.xRotateTextbox.String = Cons.rotation(1);
+        handles.yRotateTextbox.String = Cons.rotation(2);
+        handles.zRotateTextbox.String = Cons.rotation(3);
+        handles.xScaleTextbox.String = Cons.scale(1);
+        handles.yScaleTextbox.String = Cons.scale(2);
+        handles.zScaleTextbox.String = Cons.scale(3);
+        handles.xTranslateTextbox.String = Cons.translation(1);
+        handles.yTranslateTextbox.String = Cons.translation(2);
+        handles.zTranslateTextbox.String = Cons.translation(3);    
+        TransformAtlas(handles);
+        updatePlots(handles);
     end
-    
-    
-    handles.xRotateTextbox.String = Cons.rotation(1);
-    handles.yRotateTextbox.String = Cons.rotation(2);
-    handles.zRotateTextbox.String = Cons.rotation(3);
-    handles.xScaleTextbox.String = Cons.scale(1);
-    handles.yScaleTextbox.String = Cons.scale(2);
-    handles.zScaleTextbox.String = Cons.scale(3);
-    handles.xTranslateTextbox.String = Cons.translation(1);
-    handles.yTranslateTextbox.String = Cons.translation(2);
-    handles.zTranslateTextbox.String = Cons.translation(3);    
-    TransformAtlas(handles);
-    updatePlots(handles);
     
     
 function Out = getLeftCons(M)
