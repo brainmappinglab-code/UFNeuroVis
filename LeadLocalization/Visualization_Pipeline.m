@@ -1,3 +1,5 @@
+clc; close all; clear all;
+
 %% set the environment
 UFNeuroVis_setEnv;
 
@@ -181,18 +183,23 @@ load([Processed_DIR,filesep,atlasName,'_STL_',BOVATransformationName,'.mat'],'At
 h = largeFigure(100,[1280 900]); clf; set(h,'Color','k');
 handles = anatomical3DVisualizer(h, preop_T1_acpc);
 
-% Add to View Area
-AtlasInfo.LeftCMAP = hsv(length(AtlasSTL.Left));
-for n = 1:length(AtlasSTL.Left)
-    AtlasSTL.Left(n) = reducepatch(AtlasSTL.Left(n), 200);
-    AtlasPatch.Left(n) = patch(AtlasSTL.Left(n), 'FaceColor', AtlasInfo.LeftCMAP(n,:), 'EdgeColor', 'None', 'FaceAlpha', 0.5, 'FaceLighting','phong');
+if isfield(AtlasInfo,'Left')
+    % Add to View Area
+    AtlasInfo.LeftCMAP = hsv(length(AtlasSTL.Left));
+    for n = 1:length(AtlasSTL.Left)
+        AtlasSTL.Left(n) = reducepatch(AtlasSTL.Left(n), 200);
+        AtlasPatch.Left(n) = patch(AtlasSTL.Left(n), 'FaceColor', AtlasInfo.LeftCMAP(n,:), 'EdgeColor', 'None', 'FaceAlpha', 0.5, 'FaceLighting','phong');
+    end
 end
 
-AtlasInfo.RightCMAP = hsv(length(AtlasSTL.Right));
-for n = 1:length(AtlasSTL.Right)
-    AtlasSTL.Right(n) = reducepatch(AtlasSTL.Right(n), 200);
-    AtlasPatch.Right(n) = patch(AtlasSTL.Right(n), 'FaceColor', AtlasInfo.RightCMAP(n,:), 'EdgeColor', 'None', 'FaceAlpha', 0.5, 'FaceLighting','phong');
+if isfield(AtlasInfo,'Right')
+    AtlasInfo.RightCMAP = hsv(length(AtlasSTL.Right));
+    for n = 1:length(AtlasSTL.Right)
+        AtlasSTL.Right(n) = reducepatch(AtlasSTL.Right(n), 200);
+        AtlasPatch.Right(n) = patch(AtlasSTL.Right(n), 'FaceColor', AtlasInfo.RightCMAP(n,:), 'EdgeColor', 'None', 'FaceAlpha', 0.5, 'FaceLighting','phong');
+    end
 end
+
 AtlasController(AtlasInfo, AtlasPatch);
 
 % View Left Leads
@@ -224,7 +231,8 @@ for n = 1:length(rightLeads)
     end
 end
 
-%% View planned lead
+%% OPTIONAL STEP TO VIEW PLANNED LEAD
+% NOT USUALLY USED
 MetalLeadPlan = [0.7 0.7 0.7];
 InsulationColorPlan = [0,0,1];
 
