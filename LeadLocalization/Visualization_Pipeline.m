@@ -132,9 +132,9 @@ if ~PlotLead
 end
 
 % Get Subject Directory
-if ~exist([subDir,filesep,'Processed',filesep,'anat_t1_acpc.nii'],'file')
-    error('Cannot find ACPC, did you complete MRI_Pipeline?');
-end
+%if ~exist([subDir,filesep,'Processed',filesep,'anat_t1_acpc.nii'],'file')
+ %   error('Cannot find ACPC, did you complete MRI_Pipeline?');
+%end
 
 %Chauncey Wissam patient
 %BOVATransformation.Left.Translation = [-4 -2 0];
@@ -195,9 +195,9 @@ end
 AtlasController(AtlasInfo, AtlasPatch);
 
 % View Left Leads
-leftLeads = dir([subDir,filesep,'Processed',filesep,'LEAD_Left*']);
+leftLeads = dir([Processed_DIR,filesep,'LEAD_Left*']);
 for n = 1:length(leftLeads)
-    leadInfo = load([subDir,filesep,'Processed',filesep,leftLeads(n).name]);
+    leadInfo = load([Processed_DIR,filesep,leftLeads(n).name]);
     [ elfv, modelType ] = constructElectrode( leadInfo );
     for section = 1:length(modelType)
         if strcmpi(modelType(section),'contacts')

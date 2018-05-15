@@ -10,7 +10,13 @@ SourcePath = getenv('NEURO_VIS_PATH');
 if ~strcmpi(SourcePath(end),filesep)
     SourcePath = [SourcePath,filesep];
 end
-dcm2niix = ['"',SourcePath,'dependencies\dcm2nii\dcm2niix.exe"'];
+
+if ispc
+    dcm2niix = ['"',SourcePath,'dependencies',filesep,'dcm2nii',filesep,'dcm2niix.exe"'];
+else
+    dcm2niix = ['"',SourcePath,'dependencies',filesep,'dcm2nii',filesep','dcm2niix.glnxa64"'];
+end
+
 cmd=[dcm2niix, ' -z n -x n -i y -b n -f "%p_%t_%s"', ' -o "', target, '" "', source, '"'];
 
 if ~ispc
