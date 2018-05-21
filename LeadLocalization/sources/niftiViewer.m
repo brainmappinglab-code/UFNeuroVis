@@ -253,7 +253,7 @@ function minSlide_Callback(hObject, eventdata, handles)
 % handles    structure with handles and user data (see GUIDATA)
 handles.cmap(1) = get(hObject,'Value');
 if handles.cmap(1) > handles.cmap(2)
-    handles.cmap(1) = handles.cmap(2);
+    handles.cmap(1) = handles.cmap(2)-0.001;
 end
 showNifTi(handles);
 guidata(hObject, handles);
@@ -265,7 +265,7 @@ function maxSlide_Callback(hObject, eventdata, handles)
 % handles    structure with handles and user data (see GUIDATA)
 handles.cmap(2) = get(hObject,'Value');
 if handles.cmap(2) < handles.cmap(1)
-    handles.cmap(2) = handles.cmap(1);
+    handles.cmap(2) = handles.cmap(1)+0.001;
 end
 showNifTi(handles);
 guidata(hObject, handles);
