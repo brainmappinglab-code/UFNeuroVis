@@ -83,10 +83,11 @@ if ~isempty(dir([Processed_DIR,filesep,'anat_t1_acpc.nii']))
                       option1,option2,option3,option3);
     switch answer
         case option1
-            [preop_T1_acpc, transformMatrix, coordinates] = transformACPC(preop_T1);
+            [preop_T1_acpc, transformMatrix, coordinates] = transformACPC(preop_T1,[Processed_DIR,filesep,'acpc_coordinates.mat']); %add existing transformation matrix as an argument
             save_nii(preop_T1_acpc,[Processed_DIR,filesep,'anat_t1_acpc.nii']);
             preop_T1_acpc = loadNifTi([Processed_DIR,filesep,'anat_t1_acpc.nii']);
-            save([Processed_DIR,filesep,'acpc_transformation.mat'],'transformMatrix');
+            save([Processed_DIR,filesep,'acpc_transformation.mat'],'transformMatrix'); %save updated transform matrix
+            save([Processed_DIR,filesep,'acpc_coordinates.mat'],'-struct','coordinates'); %save updated coordinates
         case option2
             clear preop_T1_upsampled preop_T1;
             preop_T1_acpc = loadNifTi([Processed_DIR,filesep,'anat_t1_acpc.nii']);
@@ -95,10 +96,11 @@ if ~isempty(dir([Processed_DIR,filesep,'anat_t1_acpc.nii']))
             return;
     end
 else
-    [preop_T1_acpc, transformMatrix] = transformACPC(preop_T1);
+    [preop_T1_acpc, transformMatrix, coordinates] = transformACPC(preop_T1);
     save_nii(preop_T1_acpc,[Processed_DIR,filesep,'anat_t1_acpc.nii']);
     preop_T1_acpc = loadNifTi([Processed_DIR,filesep,'anat_t1_acpc.nii']);
     save([Processed_DIR,filesep,'acpc_transformation.mat'],'transformMatrix');
+    save([Processed_DIR,filesep,'acpc_coordinates.mat'],'-struct','coordinates');
 end
 
 %% Step 4: Coregister the Post-operative CT Scan to T1 MRI in AC-PC Coordinate

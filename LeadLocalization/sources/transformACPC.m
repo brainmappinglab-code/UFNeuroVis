@@ -1,4 +1,4 @@
-function [transformedMRI, transformMatrix, coordinates] = transformACPC( MRI )
+function [transformedMRI, transformMatrix, coordinates] = transformACPC( MRI, acpc_coordinates) %if acpc_coordinates are included, then we are editing existing coordinates
 %Lead Localization Software
 
 handles.gui = largeFigure(105, [1280 900]); clf(handles.gui);
@@ -95,9 +95,20 @@ handles.transformButton.transform = uicontrol('Style','PushButton','Units','Norm
     'String', 'Apply Transformation');
 handles.transformButton.revert = uicontrol('Style','PushButton','Units','Normalized','Position',[0.62 0.1 0.26 0.05],'Callback',@revertTransformation,...
     'String', 'Revert Transformation');
-handles.transformPosition.AC = handles.MRI.centerDimensions;
-handles.transformPosition.PC = handles.MRI.centerDimensions;
-handles.transformPosition.MC = handles.MRI.centerDimensions;
+
+if nargin==2
+    handles.transformPosition = load(acpc_coordinates);
+else
+    handles.transformPosition.AC = handles.MRI.centerDimensions;
+    handles.transformPosition.PC = handles.MRI.centerDimensions;
+    handles.transformPosition.MC = handles.MRI.centerDimensions;
+    handles.transformPosition.ACPC_AC = NaN; %the coordinates after AC PC transform
+    handles.transformPosition.ACPC_PC = NaN;
+    handles.transformPosition.ACPC_MC = NaN;
+end
+
+handles.alreadyTransformed = false;
+
 
 set(handles.gui, 'CloseRequestFcn', @closeRequestFcn);
 guidata(handles.gui, handles);
@@ -191,11 +202,23 @@ function showPosition(hObject, eventdata, type)
 handles = guidata(hObject);
 switch type
     case 'AC'
-        handles.MRI.centerDimensions = handles.transformPosition.AC;
+        if handles.alreadyTransformed
+            handles.MRI.centerDimensions = handles.transformPosition.ACPC_AC;
+        else
+            handles.MRI.centerDimensions = handles.transformPosition.AC;
+        end
     case 'PC'
-        handles.MRI.centerDimensions = handles.transformPosition.PC;
+        if handles.alreadyTransformed
+            handles.MRI.centerDimensions = handles.transformPosition.ACPC_PC;
+        else
+            handles.MRI.centerDimensions = handles.transformPosition.PC;
+        end 
     case 'MC'
-        handles.MRI.centerDimensions = handles.transformPosition.MC;
+        if handles.alreadyTransformed
+            handles.MRI.centerDimensions = handles.transformPosition.ACPC_MC;
+        else
+            handles.MRI.centerDimensions = handles.transformPosition.MC;
+        end 
 end
 updateSlices(handles);
 
@@ -204,6 +227,9 @@ function mriTransformation(hObject, eventdata)
 disp('Transformation Started, Please wait...');
 
 handles = guidata(hObject);
+
+handles.alreadyTransformed = true;
+
 Origin = (handles.transformPosition.AC + handles.transformPosition.PC) / 2;
 temp = (handles.transformPosition.MC - Origin) / rssq(handles.transformPosition.MC - Origin);
 J = (handles.transformPosition.AC - handles.transformPosition.PC) / rssq(handles.transformPosition.AC - handles.transformPosition.PC);
@@ -219,9 +245,9 @@ tform = affine3d(T);
 
 handles.transformedMRI = niftiWarp(handles.MRI, tform);
 handles.transformMatrix = T;
-handles.transformPosition.AC = transformPoint(handles.transformPosition.AC, T);
-handles.transformPosition.PC = transformPoint(handles.transformPosition.PC, T);
-handles.transformPosition.MC = transformPoint(handles.transformPosition.MC, T);
+handles.transformPosition.ACPC_AC = transformPoint(handles.transformPosition.AC, T);
+handles.transformPosition.ACPC_PC = transformPoint(handles.transformPosition.PC, T);
+handles.transformPosition.ACPC_MC = transformPoint(handles.transformPosition.MC, T);
 
 handles.MRI = handles.transformedMRI;
 handles.MRI.sliceIndex = round(handles.MRI.dimension/2);
