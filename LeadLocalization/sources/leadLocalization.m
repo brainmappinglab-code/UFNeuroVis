@@ -321,8 +321,9 @@ switch type
         handles.leadlocalization.lead.distal = handles.MRI.centerDimensions;
     case 'proximal'
         handles.leadlocalization.lead.proximal = handles.MRI.centerDimensions;
-        disp(sqrt(sum((handles.leadlocalization.lead.distal-handles.leadlocalization.lead.proximal).^2)))
 end
+disp(sqrt(sum((handles.leadlocalization.lead.distal-handles.leadlocalization.lead.proximal).^2)))
+
 updateSlices(handles);
 
 function viewContact(hObject, eventdata, type)
