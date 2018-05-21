@@ -67,7 +67,7 @@ leadTypeAll = cell(1,length(leadModels));
 for n = 1:length(leadModels)
     leadTypeAll{n} = leadModels(n).name(1:end-4);
 end
-handles.leadlocalization.leadTypeSelect = uicontrol('Style','PopUpMenu','Units','Normalized','Position',[0.8 0.198 0.08 0.03],...
+handles.leadlocalization.leadTypeSelect = uicontrol('Style','PopUpMenu','Units','Normalized','Position',[0.8 0.198 0.08 0.03],'FontSize',8,...
     'String',leadTypeAll,'Callback',{@selectLeadType});
 handles.leadlocalization.leadSideSelect = uicontrol('Style','PopUpMenu','Units','Normalized','Position',[0.8 0.145 0.08 0.03],...
     'String',{'Left','Right'},'Callback',{@selectLeadSide});
@@ -342,7 +342,7 @@ handles = guidata(hObject);
 name = hObject.String{hObject.Value};
 handles.leadlocalization.lead.type = hObject.String{hObject.Value};
 
-if strcmp(name,'medtronic_3387')
+if strcmp(name,'medtronic_3387') || strcmp(name,'medtronic_3389')
     handles.leadlocalization.lead.nContacts = 4;
 else
    error('We dont know how many contacts there are. Pleaese see leadLocalization.m selectLeadType function'); 
