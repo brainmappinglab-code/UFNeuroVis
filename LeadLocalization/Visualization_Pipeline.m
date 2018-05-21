@@ -128,7 +128,7 @@ end
 %% Setup
 MetalLead = [0.7 0.7 0.7];
 InsulationColor = [1,0,0];
-PlotLead = true;
+PlotLead = false;
 
 if ~PlotLead
     MetalLead = InsulationColor;

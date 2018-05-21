@@ -56,6 +56,7 @@ end
 %% Step 2: Upsampling MRI and Potential Image Processing (Optional for now)
 if ~isempty(dir([Processed_DIR,filesep,'anat_t1_filtered.nii']))
 	preop_T1 = loadNifTi([Processed_DIR,filesep,'anat_t1_filtered.nii']);
+    disp('MRI already upsampled and loaded.');
 else
 	% Up Sample to Images with 0.5mm Resolution
     preop_T1 = loadNifTi([Processed_DIR,filesep,'anat_t1.nii']);
@@ -89,6 +90,7 @@ if ~isempty(dir([Processed_DIR,filesep,'anat_t1_acpc.nii']))
         case option2
             clear preop_T1_upsampled preop_T1;
             preop_T1_acpc = loadNifTi([Processed_DIR,filesep,'anat_t1_acpc.nii']);
+            disp('Loaded AC-PC transformed T1.');
         case option3
             return;
     end
@@ -102,6 +104,7 @@ end
 %% Step 4: Coregister the Post-operative CT Scan to T1 MRI in AC-PC Coordinate
 if ~isempty(dir([Processed_DIR,filesep,'rpostop_ct.nii']))
     coregistered_CT = loadNifTi([Processed_DIR,filesep,'rpostop_ct.nii']);
+    disp('Loaded coregistered CT');
 elseif isempty(dir([Processed_DIR,filesep,'postop_ct.nii']))
     %if there is no postopCT, ask if user wants to do it just based on MRI
     %This would be the case if we only have a postoperative MRI available
