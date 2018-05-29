@@ -140,12 +140,16 @@ function Display_NifTi_Callback(hObject, eventdata, handles)
 % handles    structure with handles and user data (see GUIDATA)
 contents = cellstr(get(handles.fileSelection,'String'));
 filename = contents{get(handles.fileSelection,'Value')};
-handles.NifTi = load_nii([handles.patientDir,filesep,filename]);
-handles.NifTi.dime = size(handles.NifTi.img);
-handles.NifTi.center = round(handles.NifTi.dime / 2);
-handles.cmapMax = double(max(max(max(handles.NifTi.img))));
-showNifTi(handles);
-handles.currentFile = [handles.patientDir,filesep,filename];
+try 
+    handles.NifTi = load_nii([handles.patientDir,filesep,filename]);
+    handles.NifTi.dime = size(handles.NifTi.img);
+    handles.NifTi.center = round(handles.NifTi.dime / 2);
+    handles.cmapMax = double(max(max(max(handles.NifTi.img))));
+    showNifTi(handles);
+    handles.currentFile = [handles.patientDir,filesep,filename];
+catch ME
+    msgbox('Cannot load. Probably not the image you want.');
+end
 guidata(hObject, handles);
 
 % --- The standard function for plotting
