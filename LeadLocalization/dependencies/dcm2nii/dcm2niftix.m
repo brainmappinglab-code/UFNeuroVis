@@ -13,6 +13,8 @@ end
 
 if ispc
     dcm2niix = ['"',SourcePath,'dependencies',filesep,'dcm2nii',filesep,'dcm2niix.exe"'];
+elseif ismac
+    dcm2niix = ['"',SourcePath,'dependencies',filesep,'dcm2nii',filesep','dcm2niix.maci64"'];    
 else
     dcm2niix = ['"',SourcePath,'dependencies',filesep,'dcm2nii',filesep','dcm2niix.glnxa64"'];
 end

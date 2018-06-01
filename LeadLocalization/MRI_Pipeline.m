@@ -141,7 +141,7 @@ end
 % Data Check. t2-t1 transformation matrix should look identical (or at
 % least very very similar to acpc transformation matrix
 
-%% Step 5: Check coregistration.
+%% Step 5: Check coregistration
 % If the coregistration doesn't look good. Mark it and report to your
 % mentor. (This is highly unlikely event unless the brain is highly
 % shifted).
