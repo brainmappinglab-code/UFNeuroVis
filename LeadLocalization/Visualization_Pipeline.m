@@ -256,7 +256,6 @@ for n = 1:length(plannedLeads)
     t2 = 0.75+9;
     leadInfo.Proximal = [targ(1)+t2*sind(ctr), targ(2)+t2*cosd(acpc)*cosd(ctr), targ(3)+t2*sind(acpc)*cosd(ctr)];
     
-    
     [ elfv, modelType ] = constructElectrode( leadInfo );
     for section = 1:length(modelType)
         if strcmpi(modelType(section),'contacts')
