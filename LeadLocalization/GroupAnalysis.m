@@ -7,7 +7,7 @@ UFNeuroVis_setEnv;
 %teee
 %% Step 0: Setups
 root = 'C:\Users\eisinger\Documents\CT_MRI_Analysis\RamirezElkouzi_RescuePatientsLeadLocalization\Lauren_Processed';
-subjs = {'2164','2164'};
+subjs = {'2164','2164'};%
 
 %% generate list of patient directories
 dirc = [];
