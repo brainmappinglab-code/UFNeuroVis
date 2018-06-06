@@ -17,6 +17,9 @@ if isfield(AtlasInfo,'Left')
             'FontName', 'Ubuntu Mono', 'FontSize', 15, 'HorizontalAlignment', 'Left');
     end
 end
+handles.AtlasControl.Left(n) = uicontrol(handles.gui, 'Style','PushButton','String','',...
+    'Units','Normalized','Position',[0.1 0.95-ButtonHeight*n 0.1 ButtonHeight*0.7],...
+    'Callback',{@SelectColor, 'Left', n}, 'BackGroundColor', AtlasInfo.LeftCMAP(n,:));
 
 if isfield(AtlasInfo,'Right')
     ButtonHeight = 0.9 / length(AtlasInfo.Right);

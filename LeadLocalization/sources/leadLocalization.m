@@ -301,6 +301,16 @@ handles.leadlocalization.lead.side = handles.leadlocalization.leadSideSelect.Str
 handles.leadlocalization.lead.type = handles.leadlocalization.leadTypeSelect.String{handles.leadlocalization.leadTypeSelect.Value};
 guidata(hObject, handles);
 
+function savePoints(filename, Distal, Proximal)
+Distance = (Proximal - Distal) / 3;
+fid = fopen(filename,'w+');
+fprintf(fid,'x,y,z,t,label,comment\n');
+fprintf(fid,'%.2f,%.2f,%.2f,0,1,This is Contact 0\n',Distal(1),Distal(2),Distal(3));
+fprintf(fid,'%.2f,%.2f,%.2f,0,2,This is Contact 1\n',Distal(1) + Distance(1), Distal(2) + Distance(2), Distal(3) + Distance(3));
+fprintf(fid,'%.2f,%.2f,%.2f,0,3,This is Contact 2\n',Distal(1) + Distance(1)*2, Distal(2) + Distance(2)*2, Distal(3) + Distance(3)*2);
+fprintf(fid,'%.2f,%.2f,%.2f,0,4,This is Contact 3\n',Proximal(1),Proximal(2),Proximal(3));
+fclose(fid);
+
 function saveLead(hObject, eventdata)
 handles = guidata(hObject);
 Side = handles.leadlocalization.lead.side;
@@ -312,6 +322,7 @@ leadName = sprintf('%s_',handles.leadlocalization.lead.side);
 nLead = dir([handles.leadlocalization.leadFolder,filesep,leadName,'*']);
 save([handles.leadlocalization.leadFolder,filesep,'LEAD_',leadName,sprintf('%.2d.mat',length(nLead)+1)],...
     'Side','Type','nContacts','Proximal','Distal');
+savePoints([handles.leadlocalization.leadFolder,filesep,'LEAD_',leadName,sprintf('%.2d.csv',length(nLead)+1)],Distal, Proximal);
 addNew(hObject, [])
 
 function selectContact(hObject, eventdata, type)
