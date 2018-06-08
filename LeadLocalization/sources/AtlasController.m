@@ -1,6 +1,6 @@
 function AtlasController(AtlasInfo, AtlasPatch)
 
-handles.gui = largeFigure(0, [200 700]); clf(handles.gui);
+handles.gui = largeFigure(101, [200 700]); clf(handles.gui);
 set(handles.gui, 'Name', 'Atlas Controller', 'Units', 'Normalized', 'PaperPositionMode', 'Auto');
 
 if isfield(AtlasInfo,'Left')
