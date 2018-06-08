@@ -167,7 +167,7 @@ if ~isempty(bovaFits)
     
     % Transform Left Lead if Left Atlas Morph Exist
     if isfield(BovaTransform,'Left')
-        leftLeads = dir([Processed_DIR,filesep,'Lead_Left*']);
+        leftLeads = dir([Processed_DIR,filesep,'LEAD_Left*.mat']);
         for n = 1:length(leftLeads)
             leadInfo = load([Processed_DIR,filesep,leftLeads(n).name]);
             T = computeTransformMatrix(BovaTransform.Left.Translation,BovaTransform.Left.Scale,BovaTransform.Left.Rotation);
@@ -184,7 +184,7 @@ if ~isempty(bovaFits)
     
     % Transform Right Lead if Right Atlas Morph Exist
     if isfield(BovaTransform,'Right')
-        rightLeads = dir([Processed_DIR,filesep,'LEAD_Right*']);
+        rightLeads = dir([Processed_DIR,filesep,'LEAD_Right*.mat']);
         for n = 1:length(rightLeads)
             leadInfo = load([Processed_DIR,filesep,rightLeads(n).name]);
             T = computeTransformMatrix(BovaTransform.Right.Translation,BovaTransform.Right.Scale,BovaTransform.Right.Rotation);
