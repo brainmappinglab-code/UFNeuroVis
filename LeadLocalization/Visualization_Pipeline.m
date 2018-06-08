@@ -202,7 +202,7 @@ end
 AtlasController(AtlasInfo, AtlasPatch);
 
 % View Left Leads
-leftLeads = dir([Processed_DIR,filesep,'LEAD_Left*']);
+leftLeads = dir([Processed_DIR,filesep,'LEAD_Left*.mat']);
 for n = 1:length(leftLeads)
     leadInfo = load([Processed_DIR,filesep,leftLeads(n).name]);
     [ elfv, modelType ] = constructElectrode( leadInfo );
@@ -217,7 +217,7 @@ for n = 1:length(leftLeads)
 end
 
 % View Right Leads
-rightLeads = dir([Processed_DIR,filesep,'LEAD_Right*']);
+rightLeads = dir([Processed_DIR,filesep,'LEAD_Right*.mat']);
 for n = 1:length(rightLeads)
     leadInfo = load([Processed_DIR,filesep,rightLeads(n).name]);
     [ elfv, modelType ] = constructElectrode( leadInfo );
