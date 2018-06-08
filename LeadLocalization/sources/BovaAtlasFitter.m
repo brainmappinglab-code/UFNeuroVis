@@ -25,7 +25,7 @@ set(handles.figure1,'WindowScrollWheelFcn', {@wheelScrolled,handles});
 %set some temp values
 setappdata(handles.figure1,'XInd',293); %293
 setappdata(handles.figure1,'YInd',307); %307
-setappdata(handles.figure1,'ZInd',209); %209
+setappdata(handles.figure1,'ZInd',160); %209
 
 Planned.Empty = 1;
 setappdata(handles.figure1,'PlannedCoords',Planned);
