@@ -34,7 +34,12 @@ if nargin == 2
             error('Incorrect Usage');
     end
 else 
-    Nii = load_nii(nifti);
+    try 
+        Nii = load_nii(nifti);
+    catch ME
+       disp('loadNifTi.m: Load_nii failed, trying load_untouch_nii');
+       Nii = load_untouch_nii(nifti);
+    end
     Nii.hdr.dime.bitpix = 16;
     Nii.img = single(Nii.img);
     Nii.dimension = size(Nii.img);
