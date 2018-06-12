@@ -40,13 +40,13 @@ mkdir(Processed_DIR);
 if exist([Processed_DIR,filesep,'anat_t1.nii'],'file')
     disp('Nifti files detected. Skipping.')
 else
-    switch 1
+    switch 3
         case 1
             dcm2niftix(Patient_DIR, NifTi_DIR);
         case 2
             dcm2nifti_matlab(Patient_DIR, NifTi_DIR);
         case 3
-            hjimg_dcm2nii(Patient_DIR, NifTi_DIR);
+            hjimg_dcm2nii(fullfile(Patient_DIR,'IMAGES'), NifTi_DIR);
     end
     
     % Step 1.5: Move the files to processed folder

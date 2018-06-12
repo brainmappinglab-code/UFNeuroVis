@@ -148,7 +148,17 @@ try
     showNifTi(handles);
     handles.currentFile = [handles.patientDir,filesep,filename];
 catch ME
-    msgbox('Cannot load. Probably not the image you want.');
+    fprintf('used load untouch, consider reslicing (TODO)\n');
+    try
+        handles.NifTi = load_untouch_nii([handles.patientDir,filesep,filename]);
+        handles.NifTi.dime = size(handles.NifTi.img);
+        handles.NifTi.center = round(handles.NifTi.dime / 2);
+        handles.cmapMax = double(max(max(max(handles.NifTi.img))));
+        showNifTi(handles);
+        handles.currentFile = [handles.patientDir,filesep,filename];
+    catch ME2
+        msgbox('Cannot load. Probably not the image you want.');
+    end
 end
 guidata(hObject, handles);
 
