@@ -356,6 +356,12 @@ handles.leadlocalization.lead.type = hObject.String{hObject.Value};
 
 if strcmp(name,'medtronic_3387') || strcmp(name,'medtronic_3389')
     handles.leadlocalization.lead.nContacts = 4;
+elseif strcmp(name,'UF_sEEG_12')
+    handles.leadlocalization.lead.nContacts = 12;
+elseif strcmp(name,'UF_sEEG_14')
+    handles.leadlocalization.lead.nContacts = 14;
+elseif strcmp(name,'UF_sEEG_16')
+    handles.leadlocalization.lead.nContacts = 16;
 else
    error('We dont know how many contacts there are. Pleaese see leadLocalization.m selectLeadType function'); 
 end
