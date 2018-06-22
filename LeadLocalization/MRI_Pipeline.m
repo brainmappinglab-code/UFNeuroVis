@@ -122,10 +122,23 @@ elseif isempty(dir([Processed_DIR,filesep,'postop_ct.nii']))
             return;
     end
 else
-    postop_CT = loadNifTi([Processed_DIR,filesep,'postop_ct.nii']);
-    [coregistered_CT, tform] = coregisterMRI(preop_T1_acpc, postop_CT);
-    save([Processed_DIR,filesep,'ct-t1_transformation.mat'],'tform');
-    save_nii(coregistered_CT,[Processed_DIR,filesep,'rpostop_ct.nii']);
+    
+    switch 2
+        case 1
+            postop_CT = loadNifTi([Processed_DIR,filesep,'postop_ct.nii']);
+            [coregistered_CT, tform] = coregisterMRI(preop_T1_acpc, postop_CT);
+            save([Processed_DIR,filesep,'ct-t1_transformation.mat'],'tform');
+            save_nii(coregistered_CT,[Processed_DIR,filesep,'rpostop_ct.nii']);
+        case 2
+            coregistrationANTs(NEURO_VIS_PATH,Processed_DIR,'linear');
+            coregistered_CT = loadNifTi([Processed_DIR,filesep,'rpostop_ct.nii']);
+            disp('Done with coregstration ANTs!');
+        case 3
+            coregistrationANTs(NEURO_VIS_PATH,Processed_DIR,'nonlinear');
+            coregistered_CT = loadNifTi([Processed_DIR,filesep,'rpostop_ct.nii']);
+            disp('Done with coregstration ANTs!');
+    end
+    
 end
 
 %% Step 4.5: Repeat the same process for T2 MRI as well (Optional)
@@ -149,6 +162,7 @@ end
 % If coregistration is not good, see line 26 to 29 in "coregisterMRI"
 % function. Change max iteration to a larger number. 
 checkCoregistration(preop_T1_acpc, coregistered_CT);
+checkCoregistration(ACPC, coregisteredCT);
 
 %% Step 6: Lead Localization
 leadLocalization(preop_T1_acpc, coregistered_CT, Processed_DIR);
