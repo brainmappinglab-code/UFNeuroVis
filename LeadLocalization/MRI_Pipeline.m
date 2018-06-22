@@ -162,7 +162,6 @@ end
 % If coregistration is not good, see line 26 to 29 in "coregisterMRI"
 % function. Change max iteration to a larger number. 
 checkCoregistration(preop_T1_acpc, coregistered_CT);
-checkCoregistration(ACPC, coregisteredCT);
 
 %% Step 6: Lead Localization
 leadLocalization(preop_T1_acpc, coregistered_CT, Processed_DIR);
