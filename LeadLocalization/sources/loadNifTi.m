@@ -46,9 +46,16 @@ else
     Nii.XRange = (0:Nii.dimension(1)-1) * Nii.hdr.dime.pixdim(2);
     Nii.YRange = (0:Nii.dimension(2)-1) * Nii.hdr.dime.pixdim(3);
     Nii.ZRange = (0:Nii.dimension(3)-1) * Nii.hdr.dime.pixdim(4);
-    Nii.XRange = Nii.XRange - (Nii.hdr.hist.originator(1) - 1) * Nii.hdr.dime.pixdim(2);
-    Nii.YRange = Nii.YRange - (Nii.hdr.hist.originator(2) - 1) * Nii.hdr.dime.pixdim(3);
-    Nii.ZRange = Nii.ZRange - (Nii.hdr.hist.originator(3) - 1) * Nii.hdr.dime.pixdim(4);
+    
+    if ~isfield(Nii,'untouch')
+        Nii.XRange = Nii.XRange - (Nii.hdr.hist.originator(1) - 1) * Nii.hdr.dime.pixdim(2);
+        Nii.YRange = Nii.YRange - (Nii.hdr.hist.originator(2) - 1) * Nii.hdr.dime.pixdim(3);
+        Nii.ZRange = Nii.ZRange - (Nii.hdr.hist.originator(3) - 1) * Nii.hdr.dime.pixdim(4);
+    else
+        Nii.XRange = Nii.XRange + Nii.hdr.hist.qoffset_x;
+        Nii.YRange = Nii.YRange + Nii.hdr.hist.qoffset_y;
+        Nii.ZRange = Nii.ZRange + Nii.hdr.hist.qoffset_z;
+    end
 end
 
 if ndims(Nii.img) == 3
