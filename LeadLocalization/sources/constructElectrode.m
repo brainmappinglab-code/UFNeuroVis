@@ -1,4 +1,4 @@
-function [ elfv, modelType ] = constructElectrode( leadInfo )
+function [ elfv, modelType, contactCenter ] = constructElectrode( leadInfo )
 %Construct Electrode Face/Vertices for Patient Specific Transform
 %   [ elfv ] = constructElectrode( electrode, transformMarker )
 %       elfv - Electrode Face/Vertices
@@ -34,12 +34,18 @@ count = 1;
 for n = 1:length(electrode.contacts)
     electrode.contacts(n).vertices = Transformation * [electrode.contacts(n).vertices,ones(size(electrode.contacts(n).vertices,1),1)]';
     electrode.contacts(n).vertices = electrode.contacts(n).vertices(1:3,:)';
-
+    
     elfv(count).faces = electrode.contacts(n).faces;
     elfv(count).vertices = electrode.contacts(n).vertices;
     modelType{count} = 'contacts';
     count = count + 1;
 end
+
+contactCenter = zeros(4,5);
+contactCenter(1,1:3) = Origin;
+contactCenter(2,1:3) = Origin + ZDirection / 3;
+contactCenter(3,1:3) = Origin + ZDirection * 2 / 3;
+contactCenter(4,1:3) = Origin + ZDirection;
 
 for n = 1:length(electrode.insulation)
     electrode.insulation(n).vertices = Transformation * [electrode.insulation(n).vertices,ones(size(electrode.insulation(n).vertices,1),1)]';

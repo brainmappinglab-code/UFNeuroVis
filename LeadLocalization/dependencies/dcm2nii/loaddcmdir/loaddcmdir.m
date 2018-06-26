@@ -50,7 +50,7 @@ function [dcmSeries, dcmPatient, SeriesList, SeriesListNumInfo, ImageInfos, Seri
     hm = [];
     dcmSeries = []; dcmPatient = []; SeriesList = [];  SeriesListNumInfo = []; ImageInfos = []; SeriesInfos = [];
     ImgPrcTlbx = ver('images');
-    ImgPrcTlbxVersion = str2double(ImgPrcTlbx.Version(1));
+    ImgPrcTlbxVersion = str2double(ImgPrcTlbx.Version(1:2));
     if ImgPrcTlbxVersion < 4
         disp('The required minimum version of ImgProc. Toolbox is 4!');
         return; 
