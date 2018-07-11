@@ -23,10 +23,10 @@ Rmoving = imref3d(size(moveImage),movePixelDimensions(3),movePixelDimensions(2),
 
 if nargin == 2
     [optimizer,metric] = imregconfig('multimodal');
-    optimizer.InitialRadius = 0.002;
+    optimizer.InitialRadius = 0.003;
     optimizer.Epsilon = 1.5e-4;
-    optimizer.GrowthFactor = 1.5;
-    optimizer.MaximumIterations = 300;
+    optimizer.GrowthFactor = 1.1;
+    optimizer.MaximumIterations = 1200;
     transformMatrix = imregtform(moveImage, Rmoving, fixImage, Rfixed, 'rigid', optimizer, metric);
 else
     transformMatrix = varargin{1};

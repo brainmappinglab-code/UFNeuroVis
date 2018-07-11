@@ -88,15 +88,6 @@ else
     save([Processed_DIR,filesep,'acpc_coordinates.mat'],'-struct','coordinates');
 end
 
-%% Step 3: Center Postop-CT to 0,0,0
-if ~isempty(dir([Processed_DIR,filesep,'hfpostop_ct.nii']))
-    postop_ct_zero = loadNifTi([Processed_DIR,filesep,'postop_ct_zero.nii']);
-    disp('Loaded Postop CT in Zeros Coordinates');
-else
-    postop_ct_zero = niftiCenter(postop_ct);
-    save_nii(postop_ct_zero,[Processed_DIR,filesep,'postop_ct_zero.nii']);
-end
-
 %% Step 4: Coregister Postop-CT(0,0,0) to Preop-CT
 if ~isempty(dir([Processed_DIR,filesep,'hfpostop_ct.nii']))
     hfpostop_ct = loadNifTi([Processed_DIR,filesep,'hfpostop_ct.nii']);
@@ -104,8 +95,7 @@ if ~isempty(dir([Processed_DIR,filesep,'hfpostop_ct.nii']))
 else
     switch 1
         case 1
-            postop_ct_zero = loadNifTi([Processed_DIR,filesep,'postop_ct_zero.nii']);
-            [hfpostop_ct, tform] = coregisterMRI(preop_ct, postop_ct_zero);
+            [hfpostop_ct, tform] = coregisterMRI(preop_ct, postop_ct);
             save([Processed_DIR,filesep,'ct-hf_transformation.mat'],'tform');
             save_nii(hfpostop_ct,[Processed_DIR,filesep,'hfpostop_ct.nii']);
         case 2
@@ -113,14 +103,24 @@ else
                 This step is going to be done in Advanced Normalization
                 Tools (ANTs). 
             %}
+        case 3
+            % Shadow Step 4: What if DBSArch already have the transform?
+            T = readFuseMatrix([Processed_DIR,filesep,'postop2ct']);
+            T = inv(T);
+            T(:,4) = round(T(:,4));
+            POSTOPCT_tform = affine3d(T);
+            hfpostop_ct = niftiWarp(postop_ct, POSTOPCT_tform);
+            save_nii(hfpostop_ct,[Processed_DIR,filesep,'hfpostop_ct.nii']);
     end
 end
+
 
 %% Step 5. Obtain MR.xfrm file for MR-Preop transform. This is CTMR_tform.
 T = readFuseMatrix([Processed_DIR,filesep,'mr.xfrm']);
 T(:,4) = round(T(:,4));
 CTMR_tform = affine3d(T);
 rpostop_ct_raw = niftiWarp(hfpostop_ct, CTMR_tform);
+rpostop_ct_raw = niftiReslice(rpostop_ct_raw, preop_T1);
 save_nii(rpostop_ct_raw,[Processed_DIR,filesep,'rpostop_ct_raw.nii']);
 
 %% Step 6. Then apply ACPC_tform.

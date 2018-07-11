@@ -1,5 +1,12 @@
-function viewNifTi(MRI,atlasDir) %MRI,atlasDir
+function viewNifTi(MRI,atlasDir)
 %MRI Visaulization
+
+if nargin == 0
+    [file,path] = uigetfile('*.nii','Pick a postop_ct file');
+    MRI = loadNifTi([path,file]);
+    atlasDir = '';
+    handles.atlasCheck = false;
+end
 
 % Setup Figure
 handles.gui = largeFigure(0, [1280 900]); clf(handles.gui);
@@ -14,11 +21,13 @@ handles.originalMRI = handles.MRI.img;
 
 % Load Atlas
 %atlasDir = '\\gunduz-lab.bme.ufl.edu\Data\BOVA_Atlas';
-allAtlas = dir([atlasDir,filesep,'*.nii']);
-for n = 1:length(allAtlas)
-    handles.atlases(n) = loadNifTi([atlasDir,filesep,allAtlas(n).name]);
+if handles.atlasCheck
+    allAtlas = dir([atlasDir,filesep,'*.nii']);
+    for n = 1:length(allAtlas)
+        handles.atlases(n) = loadNifTi([atlasDir,filesep,allAtlas(n).name]);
+    end
+    handles.atlasThreshold = 0.3;
 end
-handles.atlasThreshold = 0.3;
 
 % Color Slider 
 handles.MRI.contrast = [0.05 0.95];
@@ -90,7 +99,9 @@ handles.referenceImage(2).CData = squeeze(handles.MRI.img(:,handles.MRI.sliceInd
 handles.referenceImage(3).CData = squeeze(handles.MRI.img(:,:,handles.MRI.sliceIndex(3)))' * handles.colormapResolution;
 
 handles = updateCrossHair(handles);
-handles = computeAtlas(handles);
+if handles.atlasCheck
+    handles = computeAtlas(handles);
+end
 guidata(handles.gui, handles);
 
 function handles = updateCrossHair(handles)

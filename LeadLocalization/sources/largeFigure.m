@@ -23,12 +23,12 @@ if ~isempty(varargin)
         monitorPSize = p(varargin{1},3:4);
     end
     set(handler,'Position',[monitorP+((monitorPSize-Size)/2) Size]);
-    set(handler,'PaperPositionMode','manual');
+    set(handler,'PaperPositionMode','auto');
 else
     p = get(0,'MonitorPositions');
     monitorP = p(1,1:2);
     monitorPSize = p(1,3:4);
     set(handler,'Position',[monitorP+((monitorPSize-Size)/2) Size]);
-    set(handler,'PaperPositionMode','manual');
+    set(handler,'PaperPositionMode','auto');
 end
 end

@@ -28,6 +28,7 @@ Processed_DIR = [Patient_DIR,filesep,'Processed'];
 %% GET BOVA TRANSFORM
 
 BovaFits = dir([Processed_DIR,filesep,'BOVAFit_*']);
+BovaFits.folder = [Processed_DIR,filesep];
 if isempty(BovaFits)
     option1 = 'Select patient folder from UF';
     option2 = 'Cancel';
@@ -127,7 +128,7 @@ end
 %% Setup
 MetalLead = [0.7 0.7 0.7];
 InsulationColor = [1,0,0];
-PlotLead = false;
+PlotLead = true;
 
 if ~PlotLead
     MetalLead = InsulationColor;

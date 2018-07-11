@@ -319,7 +319,7 @@ nContacts = handles.leadlocalization.lead.nContacts;
 Distal = handles.leadlocalization.lead.distal;
 Proximal = handles.leadlocalization.lead.proximal;
 leadName = sprintf('%s_',handles.leadlocalization.lead.side);
-nLead = dir([handles.leadlocalization.leadFolder,filesep,leadName,'*']);
+nLead = dir([handles.leadlocalization.leadFolder,filesep,'LEAD_',leadName,'*']);
 save([handles.leadlocalization.leadFolder,filesep,'LEAD_',leadName,sprintf('%.2d.mat',length(nLead)+1)],...
     'Side','Type','nContacts','Proximal','Distal');
 savePoints([handles.leadlocalization.leadFolder,filesep,'LEAD_',leadName,sprintf('%.2d.csv',length(nLead)+1)],Distal, Proximal);

@@ -20,6 +20,7 @@ ImageSize = round(ImageSize);
 outputRef = imref3d(ImageSize, NifTi.XRange([1 end]) + [-1 1] * dimensionResolution(1) / 2,...
         NifTi.YRange([1 end]) + [-1 1] * dimensionResolution(2) / 2,...
         NifTi.ZRange([1 end]) + [-1 1] * dimensionResolution(3) / 2);
+    
 newImage = imwarp(NifTi_image, Ref, tform, 'OutputView', outputRef, 'SmoothEdges', false );
 newImage = permute(newImage, [2,1,3]);
 
@@ -28,10 +29,10 @@ YRange = linspace(outputRef.YWorldLimits(1) + outputRef.PixelExtentInWorldY / 2,
 ZRange = linspace(outputRef.ZWorldLimits(1) + outputRef.PixelExtentInWorldZ / 2, outputRef.ZWorldLimits(2) - outputRef.PixelExtentInWorldZ / 2, outputRef.ImageSize(3));
 
 newWarp = make_nii(newImage,[outputRef.PixelExtentInWorldX outputRef.PixelExtentInWorldY outputRef.PixelExtentInWorldZ],...
-                             [abs(XRange(1))/mean(diff(XRange)) + 1, abs(YRange(1))/mean(diff(YRange)) + 1, abs(ZRange(1))/mean(diff(ZRange)) + 1],...
+                             [-(XRange(1))/mean(diff(XRange)) + 1, -(YRange(1))/mean(diff(YRange)) + 1, -(ZRange(1))/mean(diff(ZRange)) + 1],...
                              16);
+                         
 newNifTi = loadNifTi(newWarp, 'reformat');
-
 
 end
 

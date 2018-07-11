@@ -40,13 +40,15 @@ mkdir(Processed_DIR);
 if exist([Processed_DIR,filesep,'anat_t1.nii'],'file')
     disp('Nifti files detected. Skipping.')
 else
-    switch 3
+    switch 2
         case 1
             dcm2niftix(Patient_DIR, NifTi_DIR);
         case 2
             dcm2nifti_matlab(Patient_DIR, NifTi_DIR);
         case 3
             hjimg_dcm2nii(fullfile(Patient_DIR,'IMAGES'), NifTi_DIR);
+        case 4
+            disp('Do it in Slicer 4.8 Please');
     end
     
     % Step 1.5: Move the files to processed folder
@@ -64,7 +66,7 @@ else
 	fprintf('MRI Upsampling to 0.5mm spacing complete.\n');
 	
 	% Spatial Filtering
-	preop_T1_filtered = spatialFilter(preop_T1_upsampled, 'none');
+	preop_T1_filtered = spatialFilter(preop_T1_upsampled, 'diffusion');
 	save_nii(preop_T1_filtered,[Processed_DIR,filesep,'anat_t1_filtered.nii']);
 	preop_T1 = preop_T1_filtered;
 	fprintf('MRI Spatial Filter with Diffusion Filter complete.\n');
@@ -174,6 +176,7 @@ BovaAtlasFitter(preop_T1_acpc,Processed_DIR,NEURO_VIS_PATH);
 % ONLY RUN THIS STEP IF A BOVA FIT WAS DONE FOR THIS PATIENT
 
 bovaFits = dir([Processed_DIR,filesep,'BOVAFit*']);
+bovaFits.folder = [Processed_DIR,filesep];
 if ~isempty(bovaFits)
     bovaFit = bovaFits(1);
     BovaTransform = load(fullfile(bovaFit.folder,bovaFit.name));

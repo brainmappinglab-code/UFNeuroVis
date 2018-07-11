@@ -183,9 +183,6 @@ else
 end
 updateSlices(handles);
 
-
-
-
 function updatePosition(hObject, eventdata, type)
 handles = guidata(hObject);
 switch type
