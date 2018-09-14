@@ -233,6 +233,8 @@ end
 
 %% OPTIONAL STEP TO VIEW PLANNED LEAD
 % NOT USUALLY USED
+
+%{
 MetalLeadPlan = [0.7 0.7 0.7];
 InsulationColorPlan = [0,0,1];
 
@@ -265,3 +267,4 @@ for n = 1:length(plannedLeads)
         end
     end
 end
+%}
