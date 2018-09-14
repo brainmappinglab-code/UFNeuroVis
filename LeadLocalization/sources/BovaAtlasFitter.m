@@ -861,7 +861,7 @@ function selectExistingTransformationButton_Callback(hObject, eventdata, handles
            if consR.empty
                consL = getLeftCons(M);
                if ~consL.empty
-                    handles.existingTransformationText.String = 'Found right, but not left';
+                    handles.existingTransformationText.String = 'Found left, but not right';
                end
            else
                handles.existingTransformationText.String = 'Loaded tranformation.';
