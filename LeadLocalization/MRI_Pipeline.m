@@ -46,6 +46,7 @@ else
         case 2
             dcm2nifti_matlab(Patient_DIR, NifTi_DIR);
         case 3
+            disp('!! Note, must run installation before using hjimg_dc2nii. See dependencies/unixDCMtoNIFTI/README')
             hjimg_dcm2nii(fullfile(Patient_DIR,'IMAGES'), NifTi_DIR);
         case 4
             disp('Do it in Slicer 4.8 Please');
