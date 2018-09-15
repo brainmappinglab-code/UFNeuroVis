@@ -2,6 +2,7 @@
 % for the DICOM to NifTi unix tools
 % Enrico Opri 2018   
 
+disp('Starting installation process...')
 
 if isempty(getenv('NEURO_VIS_PATH_UNIX'))
     NEURO_VIS_PATH_UNIX = getenv('NEURO_VIS_PATH');
@@ -25,3 +26,5 @@ else
     system(['wsl chmod +x ' hjimg__dcmsort]);
     system(['wsl chmod +x ' hjimg__convert_tonii]);
 end
+
+disp('Done!')

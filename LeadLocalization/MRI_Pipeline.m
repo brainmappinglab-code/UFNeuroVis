@@ -40,7 +40,7 @@ mkdir(Processed_DIR);
 if exist([Processed_DIR,filesep,'anat_t1.nii'],'file')
     disp('Nifti files detected. Skipping.')
 else
-    switch 2
+    switch 3
         case 1
             dcm2niftix(Patient_DIR, NifTi_DIR);
         case 2
@@ -125,7 +125,7 @@ elseif isempty(dir([Processed_DIR,filesep,'postop_ct.nii']))
     end
 else
     
-    switch 2
+    switch 1
         case 1
             postop_CT = loadNifTi([Processed_DIR,filesep,'postop_ct.nii']);
             [coregistered_CT, tform] = coregisterMRI(preop_T1_acpc, postop_CT);
