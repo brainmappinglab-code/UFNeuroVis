@@ -16,8 +16,8 @@ end
 
 %hjimg__dcmsort = ['"',NEURO_VIS_PATH_UNIX,'dependencies/unixDCMtoNIFTI/hjimg__dcmsort"'];
 %hjimg__convert_tonii = ['"',NEURO_VIS_PATH_UNIX,'dependencies/unixDCMtoNIFTI/hjimg__convert_tonii"'];
-hjimg__dcmsort = [NEURO_VIS_PATH_UNIX,'dependencies/unixDCMtoNIFTI/hjimg__dcmsort'];
-hjimg__convert_tonii = [NEURO_VIS_PATH_UNIX,'dependencies/unixDCMtoNIFTI/hjimg__convert_tonii'];
+hjimg__dcmsort = [NEURO_VIS_PATH_UNIX,filesep,'dependencies',filesep','unixDCMtoNIFTI',filesep,'hjimg__dcmsort'];
+hjimg__convert_tonii = [NEURO_VIS_PATH_UNIX,filesep,'dependencies',filesep,'unixDCMtoNIFTI',filesep,'hjimg__convert_tonii'];
 
 if isunix
     system(['chmod +x ' hjimg__dcmsort]);

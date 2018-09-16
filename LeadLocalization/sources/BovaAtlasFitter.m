@@ -80,7 +80,7 @@ guidata(hObject, handles);
 
 
 function updateLeadMeasuredPopup(handles)
-    leads = dir(fullfile(getappdata(handles.figure1,'ProcessedDir'),'LEAD_*'));
+    leads = dir(fullfile(getappdata(handles.figure1,'ProcessedDir'),'LEAD_*.mat'));
     if ~isempty(leads)
         names = cell(size(leads));
         for i=1:length(leads)

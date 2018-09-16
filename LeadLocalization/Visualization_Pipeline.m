@@ -127,12 +127,9 @@ end
 
 %% Setup
 MetalLead = [0.7 0.7 0.7];
-InsulationColor = [1,0,0];
-PlotLead = true;
+InsulationColor = [0.2,0.2,0.2];
+PlotLead = false;
 
-if ~PlotLead
-    MetalLead = InsulationColor;
-end
 
 % Get Subject Directory
 %if ~exist([subDir,filesep,'Processed',filesep,'anat_t1_acpc.nii'],'file')
@@ -160,6 +157,7 @@ preop_T1_acpc = loadNifTi([Processed_DIR,filesep,'anat_t1_acpc.nii']);
 
 %% Choose Atlas
 %atlasDir = uigetdir('\\gunduz-lab.bme.ufl.edu\Data\','Please Select the atlas directory for visualization');
+disp('Loading and transforming atlas...')
 atlasDir = [NEURO_VIS_PATH,filesep,'atlasModels',filesep,'UF Anatomical Models']; 
 [atlasDir,atlasName] = fileparts(atlasDir);
 if ~exist([Processed_DIR,filesep,atlasName,'_STL_',BOVATransformationName,'.mat'],'file')
@@ -177,7 +175,7 @@ if ~exist([Processed_DIR,filesep,atlasName,'_STL_',BOVATransformationName,'.mat'
 end
 
 load([Processed_DIR,filesep,atlasName,'_STL_',BOVATransformationName,'.mat'],'AtlasSTL','AtlasInfo');
-
+disp('Done loading and transforming atlas');
 %% Visualization
 % Setup Figure
 h = largeFigure(100,[1280 900]); clf; set(h,'Color','k');
@@ -207,12 +205,16 @@ leftLeads = dir([Processed_DIR,filesep,'LEAD_Left*.mat']);
 for n = 1:length(leftLeads)
     leadInfo = load([Processed_DIR,filesep,leftLeads(n).name]);
     [ elfv, modelType ] = constructElectrode( leadInfo );
+    insulationIndex = 0;
     for section = 1:length(modelType)
         if strcmpi(modelType(section),'contacts')
             patch(handles.anatomicalView, elfv(section),'FaceColor',MetalLead,'EdgeColor','None','FaceLighting','Gouraud','AmbientStrength', 0.2);
             contactIndex = section;
-        elseif PlotLead
-            patch(handles.anatomicalView, elfv(section),'FaceColor',InsulationColor,'EdgeColor','None','FaceLighting','Gouraud','AmbientStrength', 0.2);
+        elseif strcmpi(modelType(section),'insulation')
+            insulationIndex = insulationIndex + 1;
+            if PlotLead || insulationIndex > 1 %if we shouldn't plot the lead, then only plot if we've past the first bit of insulation, which is the long part of the lead
+                patch(handles.anatomicalView, elfv(section),'FaceColor',InsulationColor,'EdgeColor','None','FaceLighting','Gouraud','AmbientStrength', 0.2);
+            end
         end
     end
 end
@@ -222,10 +224,13 @@ rightLeads = dir([Processed_DIR,filesep,'LEAD_Right*.mat']);
 for n = 1:length(rightLeads)
     leadInfo = load([Processed_DIR,filesep,rightLeads(n).name]);
     [ elfv, modelType ] = constructElectrode( leadInfo );
+    insulationIndex = 0;
     for section = 1:length(modelType)
         if strcmpi(modelType(section),'contacts')
             patch(handles.anatomicalView, elfv(section),'FaceColor',MetalLead,'EdgeColor','None','FaceLighting','Gouraud','AmbientStrength', 0.2);
-        elseif PlotLead
+        elseif strcmpi(modelType(section),'insulation')
+            insulationIndex = insulationIndex + 1;
+            if PlotLead || insulationIndex > 1 %if we shouldn't plot the lead, then only plot if we've past the first bit of insulation, which is the long part of the lead
             patch(handles.anatomicalView, elfv(section),'FaceColor',InsulationColor,'EdgeColor','None','FaceLighting','Gouraud','AmbientStrength', 0.2);
         end
     end
