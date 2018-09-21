@@ -232,6 +232,7 @@ for n = 1:length(rightLeads)
             insulationIndex = insulationIndex + 1;
             if PlotLead || insulationIndex > 1 %if we shouldn't plot the lead, then only plot if we've past the first bit of insulation, which is the long part of the lead
             patch(handles.anatomicalView, elfv(section),'FaceColor',InsulationColor,'EdgeColor','None','FaceLighting','Gouraud','AmbientStrength', 0.2);
+            end
         end
     end
 end
