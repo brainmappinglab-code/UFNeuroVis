@@ -49,9 +49,9 @@ set(handles.gui, 'WindowScrollWheelFcn', @scrollSlide)
 set(handles.gui, 'WindowButtonMotionFcn', @checkAxes);
 
 % Lead Localization Buttons
-handles.leadlocalization.addNewLead = uicontrol('Style','PushButton','Units','Normalized','Position',[0.5 0.2 0.08 0.03],...
-    'String','Add New Lead','Callback',{@addNew});
-handles.leadlocalization.addNewLead = uicontrol('Style','PushButton','Units','Normalized','Position',[0.5 0.15 0.08 0.03],...
+handles.leadlocalization.reset = uicontrol('Style','PushButton','Units','Normalized','Position',[0.5 0.2 0.08 0.03],...
+    'String','Reset','Callback',{@Reset});
+handles.leadlocalization.saveNewLead = uicontrol('Style','PushButton','Units','Normalized','Position',[0.5 0.15 0.08 0.03],...
     'String','Save New Lead','Callback',{@saveLead});
 handles.leadlocalization.distal.select = uicontrol('Style','PushButton','Units','Normalized','Position',[0.6 0.2 0.08 0.03],...
     'String','Select Distal','Callback',{@selectContact,'distal'});
@@ -72,7 +72,6 @@ handles.leadlocalization.leadTypeSelect = uicontrol('Style','PopUpMenu','Units',
     'String',leadTypeAll,'Callback',{@selectLeadType});
 handles.leadlocalization.leadSideSelect = uicontrol('Style','PopUpMenu','Units','Normalized','Position',[0.8 0.145 0.08 0.03],...
     'String',{'Choose Side','Left','Right'},'Callback',{@selectLeadSide});
-handles.leadlocalization.lead.side = 'Left'; %default
 handles.leadlocalization.leadContactSelect = uicontrol('Style','Edit','Units','Normalized','Position',[0.9 0.2 0.08 0.03],...
     'String','Number of Contacts','Callback',{@enterLeadContacts});
 handles.leadlocalization.leadNotes = uicontrol('Style','Edit','Units','Normalized','Position',[0.9 0.15 0.08 0.03],...
@@ -80,7 +79,11 @@ handles.leadlocalization.leadNotes = uicontrol('Style','Edit','Units','Normalize
 
 handles.leadlocalization.leadFolder = leadFolder;
 
-addNew();
+guidata(handles.gui,handles);
+
+Reset(handles.leadlocalization.reset,[]);
+
+handles=guidata(handles.gui);
 
 viewSlices(handles);
 
@@ -296,7 +299,7 @@ updateSlices(handles)
 %--------The following are -----------%
 %--------series of callbacks----------%
 %-------------------------------------%
-function addNew(hObject, eventdata)
+function Reset(hObject, eventdata)
 handles = guidata(hObject);
 handles.leadlocalization.lead = [];
 handles.leadlocalization.lead.distal = [0,0,0];
@@ -343,7 +346,7 @@ nLead = dir([handles.leadlocalization.leadFolder,filesep,'LEAD_',leadName,'*.mat
 save([handles.leadlocalization.leadFolder,filesep,'LEAD_',leadName,sprintf('%.2d.mat',length(nLead)+1)],...
     'Side','Type','nContacts','Proximal','Distal','Notes');
 savePoints([handles.leadlocalization.leadFolder,filesep,'LEAD_',leadName,sprintf('%.2d.csv',length(nLead)+1)],Distal, Proximal, nContacts);
-addNew(hObject, [])
+Reset(hObject, [])
 
 function selectContact(hObject, eventdata, type)
 handles = guidata(hObject);
