@@ -63,19 +63,24 @@ handles.leadlocalization.proximal.view = uicontrol('Style','PushButton','Units',
     'String','View Proximal','Callback',{@viewContact,'proximal'});
 
 leadModels = dir([getenv('NEURO_VIS_PATH'),filesep,'leadModels', filesep, '*.mat']);
-leadTypeAll = cell(1,length(leadModels));
+leadTypeAll = cell(1,length(leadModels)+1);
+leadTypeAll{1} = 'Choose Lead';
 for n = 1:length(leadModels)
-    leadTypeAll{n} = leadModels(n).name(1:end-4);
+    leadTypeAll{n+1} = leadModels(n).name(1:end-4);
 end
 handles.leadlocalization.leadTypeSelect = uicontrol('Style','PopUpMenu','Units','Normalized','Position',[0.8 0.198 0.08 0.03],'FontSize',8,...
     'String',leadTypeAll,'Callback',{@selectLeadType});
 handles.leadlocalization.leadSideSelect = uicontrol('Style','PopUpMenu','Units','Normalized','Position',[0.8 0.145 0.08 0.03],...
-    'String',{'Left','Right'},'Callback',{@selectLeadSide});
+    'String',{'Choose Side','Left','Right'},'Callback',{@selectLeadSide});
 handles.leadlocalization.lead.side = 'Left'; %default
 handles.leadlocalization.leadContactSelect = uicontrol('Style','Edit','Units','Normalized','Position',[0.9 0.2 0.08 0.03],...
-    'Callback',{@enterLeadContacts});
+    'String','Number of Contacts','Callback',{@enterLeadContacts});
+handles.leadlocalization.leadNotes = uicontrol('Style','Edit','Units','Normalized','Position',[0.9 0.15 0.08 0.03],...
+    'String','Notes');
 
 handles.leadlocalization.leadFolder = leadFolder;
+
+addNew();
 
 viewSlices(handles);
 
@@ -299,16 +304,23 @@ handles.leadlocalization.lead.proximal = [0,0,0];
 handles.leadlocalization.lead.nContacts = 0;
 handles.leadlocalization.lead.side = handles.leadlocalization.leadSideSelect.String{handles.leadlocalization.leadSideSelect.Value};
 handles.leadlocalization.lead.type = handles.leadlocalization.leadTypeSelect.String{handles.leadlocalization.leadTypeSelect.Value};
+handles.leadlocalization.leadContactSelect.String = 'Number of contacts';
+handles.leadlocalization.leadNotes.String = 'Notes';
+handles.leadlocalization.leadTypeSelect.Value = 1;
+handles.leadlocalization.leadSideSelect.Value = 1;
 guidata(hObject, handles);
 
-function savePoints(filename, Distal, Proximal)
-Distance = (Proximal - Distal) / 3;
+function savePoints(filename, Distal, Proximal, numContacts)
+Distance = (Proximal - Distal) / (numContacts - 1);
 fid = fopen(filename,'w+');
 fprintf(fid,'x,y,z,t,label,comment\n');
-fprintf(fid,'%.2f,%.2f,%.2f,0,1,This is Contact 0\n',Distal(1),Distal(2),Distal(3));
-fprintf(fid,'%.2f,%.2f,%.2f,0,2,This is Contact 1\n',Distal(1) + Distance(1), Distal(2) + Distance(2), Distal(3) + Distance(3));
-fprintf(fid,'%.2f,%.2f,%.2f,0,3,This is Contact 2\n',Distal(1) + Distance(1)*2, Distal(2) + Distance(2)*2, Distal(3) + Distance(3)*2);
-fprintf(fid,'%.2f,%.2f,%.2f,0,4,This is Contact 3\n',Proximal(1),Proximal(2),Proximal(3));
+% fprintf(fid,'%.2f,%.2f,%.2f,0,1,This is Contact 0\n',Distal(1),Distal(2),Distal(3));
+% fprintf(fid,'%.2f,%.2f,%.2f,0,2,This is Contact 1\n',Distal(1) + Distance(1), Distal(2) + Distance(2), Distal(3) + Distance(3));
+% fprintf(fid,'%.2f,%.2f,%.2f,0,3,This is Contact 2\n',Distal(1) + Distance(1)*2, Distal(2) + Distance(2)*2, Distal(3) + Distance(3)*2);
+for i=0:numContacts-2
+    fprintf(fid,'%.2f,%.2f,%.2f,0,%d,This is Contact %d\n',Distal(1) + Distance(1)*i, Distal(2) + Distance(2)*i, Distal(3) + Distance(3)*i,i+1,i);
+end
+fprintf(fid,'%.2f,%.2f,%.2f,0,%d,This is Contact %d\n',Proximal(1),Proximal(2),Proximal(3),i+2,i+1);
 fclose(fid);
 
 function saveLead(hObject, eventdata)
@@ -316,13 +328,21 @@ handles = guidata(hObject);
 Side = handles.leadlocalization.lead.side;
 Type = handles.leadlocalization.lead.type;
 nContacts = handles.leadlocalization.lead.nContacts;
+
+if nContacts==0
+    selectLeadType(handles.leadlocalization.leadTypeSelect,[]);
+    handles = guidata(hObject);
+    nContacts = handles.leadlocalization.lead.nContacts; 
+end
+
 Distal = handles.leadlocalization.lead.distal;
 Proximal = handles.leadlocalization.lead.proximal;
+Notes = handles.leadlocalization.leadNotes.String;
 leadName = sprintf('%s_',handles.leadlocalization.lead.side);
-nLead = dir([handles.leadlocalization.leadFolder,filesep,'LEAD_',leadName,'*']);
+nLead = dir([handles.leadlocalization.leadFolder,filesep,'LEAD_',leadName,'*.mat']);
 save([handles.leadlocalization.leadFolder,filesep,'LEAD_',leadName,sprintf('%.2d.mat',length(nLead)+1)],...
-    'Side','Type','nContacts','Proximal','Distal');
-savePoints([handles.leadlocalization.leadFolder,filesep,'LEAD_',leadName,sprintf('%.2d.csv',length(nLead)+1)],Distal, Proximal);
+    'Side','Type','nContacts','Proximal','Distal','Notes');
+savePoints([handles.leadlocalization.leadFolder,filesep,'LEAD_',leadName,sprintf('%.2d.csv',length(nLead)+1)],Distal, Proximal, nContacts);
 addNew(hObject, [])
 
 function selectContact(hObject, eventdata, type)
@@ -365,6 +385,7 @@ elseif strcmp(name,'UF_sEEG_16')
 else
    error('We dont know how many contacts there are. Pleaese see leadLocalization.m selectLeadType function'); 
 end
+handles.leadlocalization.leadContactSelect.String=sprintf('%d',handles.leadlocalization.lead.nContacts);
 guidata(hObject, handles);
 
 function selectLeadSide(hObject, eventdata)
@@ -374,5 +395,5 @@ guidata(hObject, handles);
 
 function enterLeadContacts(hObject, eventdata)
 handles = guidata(hObject);
-handles.leadlocalization.lead.nContacts = hObject.Value;
+handles.leadlocalization.lead.nContacts = str2double(hObject.String);
 guidata(hObject, handles);
