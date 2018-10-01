@@ -4,6 +4,8 @@ clear; clc; close all;
 %% set the environment
 UFNeuroVis_setEnv;
 
+%#ok<*NASGU>
+
 %% Step 0: Setups
 Patient_DIR = uigetdir('','Please select the subject Folder');
 if isnumeric(Patient_DIR) 
@@ -22,11 +24,12 @@ MRIFILTERED = false;
 CTFILTERED = false;
 TRANSFORMED = false;
 COREGISTERED = false;
+NEW_ACPC_COORDINATES=false;
 
 NifTi_DIR = [Patient_DIR,filesep,'NiiX'];
 Processed_DIR = [Patient_DIR,filesep,'Processed'];
-mkdir(NifTi_DIR);
-mkdir(Processed_DIR);
+[~,~]=mkdir(NifTi_DIR);
+[~,~]=mkdir(Processed_DIR);
 
 %% Step 1: DICOM to NifTi Converter
 % There are 3 methods at the moment. First method uses dcm2niix.exe for
@@ -60,6 +63,7 @@ end
 if ~isempty(dir([Processed_DIR,filesep,'anat_t1_filtered.nii']))
 	preop_T1 = loadNifTi([Processed_DIR,filesep,'anat_t1_filtered.nii']);
     disp('MRI already upsampled and loaded.');
+    MRIFILTERED=true;
 else
 	% Up Sample to Images with 0.5mm Resolution
     preop_T1 = loadNifTi([Processed_DIR,filesep,'anat_t1.nii']);
@@ -71,6 +75,7 @@ else
 	save_nii(preop_T1_filtered,[Processed_DIR,filesep,'anat_t1_filtered.nii']);
 	preop_T1 = preop_T1_filtered;
 	fprintf('MRI Spatial Filter with Diffusion Filter complete.\n');
+    MRIFILTERED=true;
 end
 
 %% Step 3: Transform the MRI Brain to AC-PC Coordinates
@@ -91,10 +96,14 @@ if ~isempty(dir([Processed_DIR,filesep,'anat_t1_acpc.nii']))
             preop_T1_acpc = loadNifTi([Processed_DIR,filesep,'anat_t1_acpc.nii']);
             save([Processed_DIR,filesep,'acpc_transformation.mat'],'transformMatrix'); %save updated transform matrix
             save([Processed_DIR,filesep,'acpc_coordinates.mat'],'-struct','coordinates'); %save updated coordinates
+            NEW_ACPC_COORDINATES=true;
+            TRANSFORMED=true;
         case option2
             clear preop_T1_upsampled preop_T1;
             preop_T1_acpc = loadNifTi([Processed_DIR,filesep,'anat_t1_acpc.nii']);
             disp('Loaded AC-PC transformed T1.');
+            NEW_ACPC_COORDINATES=false;
+            TRANSFORMED=true;
         case option3
             return;
     end
@@ -104,12 +113,15 @@ else
     preop_T1_acpc = loadNifTi([Processed_DIR,filesep,'anat_t1_acpc.nii']);
     save([Processed_DIR,filesep,'acpc_transformation.mat'],'transformMatrix');
     save([Processed_DIR,filesep,'acpc_coordinates.mat'],'-struct','coordinates');
+    NEW_ACPC_COORDINATES=true;
+    TRANSFORMED=true;
 end
 
 %% Step 4: Coregister the Post-operative CT Scan to T1 MRI in AC-PC Coordinate
-if ~isempty(dir([Processed_DIR,filesep,'rpostop_ct.nii']))
+if ~isempty(dir([Processed_DIR,filesep,'rpostop_ct.nii'])) && NEW_ACPC_COORDINATES==false && TRANSFORMED==true
     coregistered_CT = loadNifTi([Processed_DIR,filesep,'rpostop_ct.nii']);
     disp('Loaded coregistered CT');
+    COREGISTERED=true;
 elseif isempty(dir([Processed_DIR,filesep,'postop_ct.nii']))
     %if there is no postopCT, ask if user wants to do it just based on MRI
     %This would be the case if we only have a postoperative MRI available
@@ -124,22 +136,24 @@ elseif isempty(dir([Processed_DIR,filesep,'postop_ct.nii']))
         case option2
             return;
     end
-else
-    
+elseif TRANSFORMED==true
     switch 1
         case 1
             postop_CT = loadNifTi([Processed_DIR,filesep,'postop_ct.nii']);
             [coregistered_CT, tform] = coregisterMRI(preop_T1_acpc, postop_CT);
             save([Processed_DIR,filesep,'ct-t1_transformation.mat'],'tform');
             save_nii(coregistered_CT,[Processed_DIR,filesep,'rpostop_ct.nii']);
+            COREGISTERED=true;
         case 2
             coregistrationANTs(NEURO_VIS_PATH,Processed_DIR,'linear');
             coregistered_CT = loadNifTi([Processed_DIR,filesep,'rpostop_ct.nii']);
             disp('Done with coregstration ANTs!');
+            COREGISTERED=true;
         case 3
             coregistrationANTs(NEURO_VIS_PATH,Processed_DIR,'nonlinear');
             coregistered_CT = loadNifTi([Processed_DIR,filesep,'rpostop_ct.nii']);
             disp('Done with coregstration ANTs!');
+            COREGISTERED=true;
     end
     
 end
@@ -164,10 +178,14 @@ end
 
 % If coregistration is not good, see line 26 to 29 in "coregisterMRI"
 % function. Change max iteration to a larger number. 
-checkCoregistration(preop_T1_acpc, coregistered_CT);
+if COREGISTERED==true
+    checkCoregistration(preop_T1_acpc, coregistered_CT);
+end
 
 %% Step 6: Lead Localization
-leadLocalization(preop_T1_acpc, coregistered_CT, Processed_DIR);
+if COREGISTERED==true
+    leadLocalization(preop_T1_acpc, coregistered_CT, Processed_DIR);
+end
 
 %% Step 7: Normalization based on patient morph
 preop_T1_acpc = loadNifTi([Processed_DIR,filesep,'anat_t1_acpc.nii']);
