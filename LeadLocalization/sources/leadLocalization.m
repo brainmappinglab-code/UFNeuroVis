@@ -57,6 +57,10 @@ handles.leadlocalization.distal.select = uicontrol('Style','PushButton','Units',
     'String','Select Distal','Callback',{@selectContact,'distal'});
 handles.leadlocalization.proximal.select = uicontrol('Style','PushButton','Units','Normalized','Position',[0.7 0.2 0.08 0.03],...
     'String','Select Proximal','Callback',{@selectContact,'proximal'});
+handles.leadlocalization.distal.showSelect = uicontrol('Style','text','Units','Normalized','Position',[0.6 0.25 0.08 0.03],...
+    'String','[   0,   0,   0]','BackgroundColor',[0 0 0],'ForegroundColor',[1 1 1]);
+handles.leadlocalization.proximal.showSelect = uicontrol('Style','text','Units','Normalized','Position',[0.7 0.25 0.08 0.03],...
+    'String','[   0,   0,   0]','BackgroundColor',[0 0 0],'ForegroundColor',[1 1 1]);
 handles.leadlocalization.distal.view = uicontrol('Style','PushButton','Units','Normalized','Position',[0.6 0.15 0.08 0.03],...
     'String','View Distal','Callback',{@viewContact,'distal'});
 handles.leadlocalization.proximal.view = uicontrol('Style','PushButton','Units','Normalized','Position',[0.7 0.15 0.08 0.03],...
@@ -311,6 +315,8 @@ handles.leadlocalization.leadContactSelect.String = 'Number of contacts';
 handles.leadlocalization.leadNotes.String = 'Notes';
 handles.leadlocalization.leadTypeSelect.Value = 1;
 handles.leadlocalization.leadSideSelect.Value = 1;
+handles.leadlocalization.distal.showSelect.String='[   0,   0,   0]';
+handles.leadlocalization.proximal.showSelect.String='[   0,   0,   0]';
 guidata(hObject, handles);
 
 function savePoints(filename, Distal, Proximal, numContacts)
@@ -353,8 +359,14 @@ handles = guidata(hObject);
 switch type
     case 'distal'
         handles.leadlocalization.lead.distal = handles.MRI.centerDimensions;
+        handles.leadlocalization.distal.showSelect.String=sprintf('[%.2f, %.2f, %.2f]',...
+            handles.leadlocalization.lead.distal(1),handles.leadlocalization.lead.distal(2),...
+            handles.leadlocalization.lead.distal(3));
     case 'proximal'
         handles.leadlocalization.lead.proximal = handles.MRI.centerDimensions;
+        handles.leadlocalization.proximal.showSelect.String=sprintf('[%.2f, %.2f, %.2f]',...
+            handles.leadlocalization.lead.proximal(1),handles.leadlocalization.lead.proximal(2),...
+            handles.leadlocalization.lead.proximal(3));
 end
 disp(sqrt(sum((handles.leadlocalization.lead.distal-handles.leadlocalization.lead.proximal).^2)))
 
