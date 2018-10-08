@@ -1,7 +1,10 @@
-function AtlasController(AtlasInfo, AtlasPatch)
+function AtlasController(AtlasInfo, AtlasPatch, varargin)
 
 handles.gui = largeFigure(101, [200 700]); clf(handles.gui);
-set(handles.gui, 'Name', 'Atlas Controller', 'Units', 'Normalized', 'PaperPositionMode', 'Auto');
+set(handles.gui, 'Name', 'Atlas Controller', 'Units', 'Normalized');
+m = uimenu(handles.gui,'Label','Atlas State');
+mitem1 = uimenu(m,'Label','Toggle All On', 'Callback',{@toggleCallback, true});
+mitem2 = uimenu(m,'Label','Toggle All Off', 'Callback',{@toggleCallback, false});
 
 if isfield(AtlasInfo,'Left')
     ButtonHeight = 0.9 / length(AtlasInfo.Left);
@@ -14,7 +17,7 @@ if isfield(AtlasInfo,'Left')
             'Callback',{@CheckAtlas, 'Left', n}, 'Value', 1);
         handles.AtlasLabel.Left(n) = uicontrol(handles.gui, 'Style','text','String',AtlasInfo.Left(n).name(1:end-4),...
             'Units','Normalized','Position',[0.32 0.94-ButtonHeight*n 0.25 ButtonHeight*0.7],...
-            'FontName', 'Ubuntu Mono', 'FontSize', 15, 'HorizontalAlignment', 'Left');
+            'FontName', 'Lato', 'FontSize', 15, 'HorizontalAlignment', 'Left');
     end
 end
 
@@ -29,13 +32,44 @@ if isfield(AtlasInfo,'Right')
             'Callback',{@CheckAtlas, 'Right', n}, 'Value', 1);
         handles.AtlasLabel.Right(n) = uicontrol(handles.gui, 'Style','text','String',AtlasInfo.Right(n).name(1:end-4),...
             'Units','Normalized','Position',[0.78 0.94-ButtonHeight*n 0.15 ButtonHeight*0.7],...
-            'FontName', 'Ubuntu Mono', 'FontSize', 15, 'HorizontalAlignment', 'Left');
+            'FontName', 'Lato', 'FontSize', 15, 'HorizontalAlignment', 'Left');
     end
 end
 
 handles.AtlasInfo = AtlasInfo;
 handles.AtlasPatch = AtlasPatch;
+if ~isempty(varargin)
+handles = toggleAll(handles,varargin{1});
+end
+
 guidata(handles.gui, handles);
+
+function handles = toggleAll(handles, state)
+if ~state
+    for i = 1:length(handles.AtlasControl.Left)
+        handles.AtlasCheck.Left(i).Value = 0;
+        handles.AtlasPatch.Left(i).Visible = 'off';
+    end
+    for i = 1:length(handles.AtlasControl.Right)
+        handles.AtlasCheck.Right(i).Value = 0;
+        handles.AtlasPatch.Right(i).Visible = 'off';
+    end
+else
+    for i = 1:length(handles.AtlasControl.Left)
+        handles.AtlasCheck.Left(i).Value = 1;
+        handles.AtlasPatch.Left(i).Visible = 'on';
+    end
+    for i = 1:length(handles.AtlasControl.Right)
+        handles.AtlasCheck.Right(i).Value = 1;
+        handles.AtlasPatch.Right(i).Visible = 'on';
+    end
+end
+
+function toggleCallback(hObject, eventdata, state)
+handles = guidata(hObject);
+handles = toggleAll(handles, state);
+guidata(handles.gui, handles);
+
 
 function SelectColor(hObject, eventdata, side, atlasIndex)
 h = figure(); clf;
