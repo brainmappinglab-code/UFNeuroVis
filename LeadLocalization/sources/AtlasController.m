@@ -46,22 +46,30 @@ guidata(handles.gui, handles);
 
 function handles = toggleAll(handles, state)
 if ~state
-    for i = 1:length(handles.AtlasControl.Left)
-        handles.AtlasCheck.Left(i).Value = 0;
-        handles.AtlasPatch.Left(i).Visible = 'off';
+    if isfield(handles.AtlasControl,'Left')
+        for i = 1:length(handles.AtlasControl.Left)
+            handles.AtlasCheck.Left(i).Value = 0;
+            handles.AtlasPatch.Left(i).Visible = 'off';
+        end
     end
-    for i = 1:length(handles.AtlasControl.Right)
-        handles.AtlasCheck.Right(i).Value = 0;
-        handles.AtlasPatch.Right(i).Visible = 'off';
+    if isfield(handles.AtlasControl,'Right')
+        for i = 1:length(handles.AtlasControl.Right)
+            handles.AtlasCheck.Right(i).Value = 0;
+            handles.AtlasPatch.Right(i).Visible = 'off';
+        end
     end
 else
-    for i = 1:length(handles.AtlasControl.Left)
-        handles.AtlasCheck.Left(i).Value = 1;
-        handles.AtlasPatch.Left(i).Visible = 'on';
+    if isfield(handles.AtlasControl,'Left')
+        for i = 1:length(handles.AtlasControl.Left)
+            handles.AtlasCheck.Left(i).Value = 1;
+            handles.AtlasPatch.Left(i).Visible = 'on';
+        end
     end
-    for i = 1:length(handles.AtlasControl.Right)
-        handles.AtlasCheck.Right(i).Value = 1;
-        handles.AtlasPatch.Right(i).Visible = 'on';
+    if isfield(handles.AtlasControl,'Right')
+        for i = 1:length(handles.AtlasControl.Right)
+            handles.AtlasCheck.Right(i).Value = 1;
+            handles.AtlasPatch.Right(i).Visible = 'on';
+        end
     end
 end
 
