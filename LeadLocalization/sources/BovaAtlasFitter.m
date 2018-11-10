@@ -136,6 +136,7 @@ function Out = UpdateRotationBasedOnLaterality(handles,rotation)
     Out = rotation;
     if handles.rightCheckbox.Value == 1
         Out(2) = -1*Out(2); %if we are on the right side, the rotation that occurs is actually flipped for y dimension
+        Out(3) = -1*Out(3); %also flip rotation z dimension if we are on right side
     end
     
 function Out = getConsFromTextboxes(handles)
