@@ -52,6 +52,8 @@ else
             disp('!! Note, must run installation before using hjimg_dc2nii. See dependencies/unixDCMtoNIFTI/README')
             hjimg_dcm2nii(fullfile(Patient_DIR,'IMAGES'), NifTi_DIR);
         case 4
+            disp('Try to coregister before doing AC-PC, then apply AC-PC transform to CT scan.');
+        case 5
             disp('Do it in Slicer 4.8 Please');
     end
     
@@ -137,7 +139,7 @@ elseif isempty(dir([Processed_DIR,filesep,'postop_ct.nii']))
             return;
     end
 elseif TRANSFORMED==true
-    switch 1
+    switch 4
         case 1
             postop_CT = loadNifTi([Processed_DIR,filesep,'postop_ct.nii']);
             [coregistered_CT, tform] = coregisterMRI(preop_T1_acpc, postop_CT);
