@@ -67,7 +67,9 @@ for n = 1:size(p,1)
     end
 end
 Size = get(handles.figure1,'Position');
+monitorP = [0 0];
 set(handles.figure1,'Position',[monitorP Size(3:4)]);
+
 
 % Display all NifTi files in the folder
 handles.patientDir = varargin{1};
