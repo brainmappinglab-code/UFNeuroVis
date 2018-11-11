@@ -46,7 +46,16 @@ if isempty(tF)
     tF = dir([glrPath '\*.apm']);
 end
 
-talloc = table('Size',[12 5],'VariableTypes',{'double', 'string', 'double', 'double', 'double'},'VariableName',{'depth','path','x','y','z'});
+if verLessThan('matlab','9.4') % older than 2018a
+    depth = zeros(12,1);
+    path = strings(12,1);
+    x = zeros(12,1);
+    y = zeros(12,1);
+    z = zeros(12,1);
+    talloc = table(depth,path,x,y,z);
+else
+    talloc = table('Size',[12 5],'VariableTypes',{'double', 'string', 'double', 'double', 'double'},'VariableName',{'depth','path','x','y','z'});
+end
 ApmDataTable = {};
 sprintf('%s',tF.name)
 

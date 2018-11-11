@@ -2,7 +2,8 @@ function extract_wav_files(glrPath)
 %EXTRACT_WAV_FILES Summary of this function goes here
 
 %get initial file list
-if ~isfolder([glrPath '\wav'])
+%if ~isfolder([glrPath '\wav'])
+if exist([glrPath '\wav'],'dir')~=7
     mkdir([glrPath '\wav']);
 end
 tF = dir([glrPath '\wav\*.wav']);

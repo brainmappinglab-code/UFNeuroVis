@@ -1,5 +1,13 @@
 ------------------SYSTEM REQUIREMENTS------------------
-1. Install FHC Guideline 4000 Exporter Tool.
+1. Follow instructions in pdf in this folder
+	1a. must install .NET
+	1b. must install Visual C++
+	1c. Install FHC Guideline 4000 Exporter Tool.
+		ftp://ftp.termobit.ro/Public/Exporter/
+		Download Exporter__1.3.2.zip
+		Login: fhcguest
+		Password: ghcguest
+2. Navigate to C:\Program Files (x86)\FHC\ and add "FHC Exporter folder to full access permissions
 2. Include FHC_matlablib in MATLAB path.
 3. Include C:\Program Files (x86)\FHC\FHC Exporter\Matlab in MATLAB path.
 4. Include ...\MER-to-xls\data in MATLAB path
