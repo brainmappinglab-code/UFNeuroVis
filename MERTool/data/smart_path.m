@@ -29,15 +29,19 @@ if size(tF_dbs,1) == 1 ...
     fprintf('smart path conditions met\n')
     
     if strcmp(get(handles.dbs_disp,'String'),'...')
-        set(handles.dbs_disp,'String',[tF_dbs.folder '\' tF_dbs.name]);
+        set(handles.dbs_disp,'String',[tF_dbs.folder,filesep,tF_dbs.name]);
     end
     
     if strcmp(get(handles.crw_disp,'String'),'...')
-        set(handles.crw_disp,'String',[tF_crw.folder '\' tF_crw.name]);
+        set(handles.crw_disp,'String',[tF_crw.folder,filesep,tF_crw.name]);
     end
     
     if strcmp(get(handles.apm_disp,'String'),'...')
         set(handles.apm_disp,'String',tF_crw.folder);
+    end
+    
+    if strcmp(get(handles.destination_disp,'String'),'...')
+        set(handles.destination_disp,'String',[tF_dbs.folder,filesep,'Output.xls']);
     end
     
 end

@@ -67,9 +67,15 @@ daH = handles.disp_axes;
 taH = handles.traj_axes;
 
 % plot APM data
-ApmDataTable = build_apm_table(glrPath);
-ApmDataTable = repair_apm_table(ApmDataTable,'linear');
-extract_wav_files(glrPath); %TODO separate path?
+if exist([glrPath,filesep,'ApmDataTable.mat'],'file')==2
+    ApmDataTableMat = load([glrPath,filesep,'ApmDataTable.mat']);
+    ApmDataTable = ApmDataTableMat.ApmDataTable;
+else
+    ApmDataTable = build_apm_table(glrPath);
+    ApmDataTable = repair_apm_table(ApmDataTable,'linear');
+    extract_wav_files(glrPath); %TODO separate path?
+    save([glrPath,filesep,'ApmDataTable.mat'],'ApmDataTable')
+end
 
 %TODO uncomment this
 %{

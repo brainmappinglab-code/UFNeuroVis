@@ -22,7 +22,7 @@ function varargout = MER_gui(varargin)
 
 % Edit the above text to modify the response to help MER_gui
 
-% Last Modified by GUIDE v2.5 11-Jun-2018 11:12:26
+% Last Modified by GUIDE v2.5 11-Nov-2018 16:10:32
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 1;
@@ -136,9 +136,9 @@ function change_dir_button_Callback(hObject, eventdata, handles)
         set(handles.destination_disp,'String',[path file]);
     end
 
-% --- Executes on button press in convert_button.
-function convert_button_Callback(hObject, eventdata, handles)
-% hObject    handle to convert_button (see GCBO)
+% --- Executes on button press in run_button.
+function run_button_Callback(hObject, eventdata, handles)
+% hObject    handle to run_button (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
     status = 1;
@@ -192,7 +192,7 @@ function toggle_buttons(state,handles)
     set(handles.crw_button,'enable',state);
     set(handles.change_dir_button,'enable',state);
     set(handles.folder_button,'enable',state);
-    set(handles.convert_button,'enable',state);
+    set(handles.run_button,'enable',state);
 
 % --- Executes on button press in xls_radio.
 function xls_radio_Callback(hObject, eventdata, handles)
