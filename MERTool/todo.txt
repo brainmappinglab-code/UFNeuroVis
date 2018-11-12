@@ -1,2 +1,5 @@
 TODO 1. select ignore or linear for out of range depths
 TODO 2. firing rate display
+TODO 3. filter by structure, drop down box on the right
+TODO 4. doesn't seem to be finding the closest match right now?
+TODO 5. MER raw data should be the color of the pass in the graph above

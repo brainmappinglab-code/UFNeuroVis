@@ -3,7 +3,7 @@ function export_point_data(handles)
 
 section_path = getappdata(handles.traj_axes,'SectionPath');
 
-[~,fname,~] = fileparts(section_path);
+[~,fname,~] = fileparts(char(section_path));
 
 t = APMReadData(section_path);
 
