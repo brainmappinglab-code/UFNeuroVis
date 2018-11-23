@@ -80,14 +80,18 @@ while ~isempty(filename)
         waitbar(i/N,w,sprintf('Extracting APM data (%d/%d)',i,N));
         path = string(strcat(glrPath,'\',filename(i)));
         t = APMReadData(path);
-        dist = t.drive_data.depth;
+        dist = t.drive_data(1).depth; %sometimes multiple drive_data are recorded in each section if there are multiple passes activated at once
         if i > size(temp,1)
             temp = [temp;talloc];
         end
         temp.path(i) = path; %path
         % if depth is empty, skip them
         if ~isempty(dist)
-            temp.depth(i) = dist(2)/1000; %depth
+            if size(dist,1) > 1
+                error('There are two depth values associated with this section. This is a known issue that Cosmin from FHC is aware of. Please report to him with this example.');
+            else
+                temp.depth(i) = dist(2)/1000; %depth value at the second location (timestamp at first location); convert to millimeters
+            end
         end
     end
     
