@@ -1,4 +1,4 @@
-function plot_section_data(aH,sectionPath,style)
+function plot_section_data(aH,ApmDataTable,style,iPass,iPoint)
 %{
 PLOT_SECTION_DATA
     After selecting point in traj_axes, display the APM channel data
@@ -11,6 +11,16 @@ RETURNS
     None
 %}
 
+f = ancestor(aH,'figure');
+% update depth text display
+depthH = findobj(f,'Tag','depth_disp');
+
+sectionPath = ApmDataTable{iPass}.path(iPoint);
+
+cla(aH,'reset');
+
+hold(aH,'on');
+
 % open and read the APM file
 t = APMReadData(sectionPath);
 
@@ -20,6 +30,13 @@ FS = channel.sampling_frequency;
 data = channel.continuous * channel.voltage_calibration;
 start_trial = channel.start_trial;
 time = (start_trial:(length(data)+start_trial-1))/FS;
+
+dur = time(end) - time(1);
+
+% update depth text display
+depth = ApmDataTable{iPass}.depth(iPoint);
+str = sprintf('Pass %d, Depth %.2fmm, Duration: %.2fs',iPass,depth,dur);
+set(depthH,'String',str);
 
 % spike calculations
 std_min = 4;
@@ -32,7 +49,8 @@ sampled_spike_times = spike_times(spike_section.time,FS);
 
 if style == 1
     %full
-    plot(aH,time,data)
+    color = get(aH,'colororder');
+    plot(aH,time,data,'Color',color(iPass,:))
 elseif style == 2
     %spike peaks
     scatter(aH,spike_section.local_index,spike_section.spikes(:,20),'r')

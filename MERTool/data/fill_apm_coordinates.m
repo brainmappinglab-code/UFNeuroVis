@@ -1,6 +1,6 @@
-function ApmDataTable = plotter1(CrwData,DbsData,ApmDataTable,aH)
+function ApmDataTable = fill_apm_coordinates(CrwData,DbsData,ApmDataTable)
 %{
-PLOTTER1
+FILL_APM_COORDINATES
     Fills columns 3,4,5 of ApmDataTable with x,y,z coordinates that
     correspond to the depths in column 1, using the trajectories
     defined in the CrwData. Then plots those x,y,z
@@ -43,29 +43,13 @@ end
 CTR = CrwData.clineangle ;
 ACPC = CrwData.acpcangle ;
 
-for iPass = 1:nPass
-    x = [];
-    y = [];
-    z = [];
-    
+for iPass = 1:nPass    
     %extract T values (depths from ApmDataTable column 1)
     T = [ApmDataTable{iPass}.depth];
     
     for iPoint = 1:size(T,1)
-        % skip empty depths, don't break on empty entries
-        % if isempty(ApmDataTable{iPass})
-        %     continue % this was break, why?
-        % end
-        x(iPoint,1) = LtEntryPoint(iPass) -(T(iPoint) * sind(CTR));
-        y(iPoint,1) = ApEntryPoint(iPass) - (T(iPoint) * cosd(ACPC) * cosd(CTR)) ;
-        z(iPoint,1) = AxEntryPoint(iPass) - (T(iPoint) * sind(ACPC) * cosd(CTR));
-        ApmDataTable{iPass}.x(iPoint) = x(iPoint,1);
-        ApmDataTable{iPass}.y(iPoint) = y(iPoint,1);
-        ApmDataTable{iPass}.z(iPoint) = z(iPoint,1);
+        ApmDataTable{iPass}.x(iPoint) = LtEntryPoint(iPass) -(T(iPoint) * sind(CTR));
+        ApmDataTable{iPass}.y(iPoint) = ApEntryPoint(iPass) - (T(iPoint) * cosd(ACPC) * cosd(CTR)) ;
+        ApmDataTable{iPass}.z(iPoint) = AxEntryPoint(iPass) - (T(iPoint) * sind(ACPC) * cosd(CTR));
     end
-    
-    %plot each x,y,z after calculating
-    fprintf('plotting pass %d\n',iPass)
-    lH = plot3(aH,x,y,z,'-s');
-    set(lH,'hittest','off');
 end

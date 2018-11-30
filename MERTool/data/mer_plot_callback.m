@@ -1,4 +1,4 @@
-function mer_plot_callback(aH,event)
+function mer_plot_callback(aH,event,ApmDataTable)
 %{
 MER_PLOT_CALLABCK
     Updates the disp_axes with the APM channel data of the closest point
@@ -14,10 +14,8 @@ RETURNS
 
     % if a match is found,
     if iPoint ~= 0 && iPass ~= 0
-        match = dbs_match(aH,iPoint,iPass);
-        if match ~= 0
-            display_match(aH,match,iPass);
-        end
+        match = ApmDataTable{iPass}.match(iPoint);
+        display_match(aH,match,iPass);
     end    
 
 end

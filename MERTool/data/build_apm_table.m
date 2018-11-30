@@ -16,6 +16,7 @@ RETURNS
                                x
                                y
                                z
+                               match
 %}
 
 if ~nargin
@@ -52,9 +53,10 @@ if verLessThan('matlab','9.4') % older than 2018a
     x = zeros(12,1);
     y = zeros(12,1);
     z = zeros(12,1);
-    talloc = table(depth,path,x,y,z);
+    match = zeros(12,1);
+    talloc = table(depth,path,x,y,z,match);
 else
-    talloc = table('Size',[12 5],'VariableTypes',{'double', 'string', 'double', 'double', 'double'},'VariableName',{'depth','path','x','y','z'});
+    talloc = table('Size',[12 6],'VariableTypes',{'double', 'string', 'double', 'double', 'double','double'},'VariableName',{'depth','path','x','y','z','match'});
 end
 ApmDataTable = {};
 sprintf('%s',tF.name)

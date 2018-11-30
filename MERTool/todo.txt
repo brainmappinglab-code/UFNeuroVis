@@ -1,9 +1,9 @@
 TODO 1. select ignore or linear for out of range depths
 TODO 2. firing rate display
-TODO 3. filter by structure, drop down box on the right
-TODO 4. doesn't seem to be finding the closest match right now?
-TODO 5. MER raw data should be the color of the pass in the graph above
-TODO 6. add length of recording to title of recording
 TODO 7. whitespace to MER graph?
-TODO 8. feature to hide/show name of patient by right clicking on the name
 TODO 9. under best match, show "Num Cells: X", and color code cells in the Spikes-line drop down
+
+
+FIXED 4. doesn't seem to be finding the closest match right now?
+TODO 10. audio - controls, delete marker after play stops
+TODO 11. some filters don't seem to be working (Bord, etc.)

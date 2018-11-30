@@ -22,7 +22,7 @@ function varargout = MER_plot(varargin)
 
 % Edit the above text to modify the response to help MER_plot
 
-% Last Modified by GUIDE v2.5 09-Nov-2018 12:44:30
+% Last Modified by GUIDE v2.5 23-Nov-2018 23:02:11
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 1;
@@ -54,6 +54,7 @@ function MER_plot_OpeningFcn(hObject, eventdata, handles, varargin)
 
 % Choose default command line output for MER_plot
 handles.output = hObject;
+handles.myPlayer = [];
 
 % Update handles structure
 guidata(hObject, handles);
@@ -73,33 +74,18 @@ if exist([glrPath,filesep,'ApmDataTable.mat'],'file')==2
 else
     ApmDataTable = build_apm_table(glrPath);
     ApmDataTable = repair_apm_table(ApmDataTable,'linear');
+    ApmDataTable = fill_apm_coordinates(CrwData,DbsData,ApmDataTable);
+    ApmDataTable = fill_apm_match(ApmDataTable,DbsData);
     extract_wav_files(glrPath); %TODO separate path?
     save([glrPath,filesep,'ApmDataTable.mat'],'ApmDataTable')
 end
-
-%TODO uncomment this
-%{
-if size(ApmDataTable,3) < size(DbsData.data1,3)
-    ApmDataTable = repair_apm_table(ApmDataTable,DbsData);
-end
-%}
 
 if isempty(ApmDataTable)
     close;
     MER_gui()
 end
 
-%label axes of traj_axes
-xlabel(taH,'LT');
-ylabel(taH,'AP');
-zlabel(taH,'AX');
-hold(taH,'on');
-
-ApmDataTable = plotter1(CrwData,DbsData,ApmDataTable,taH);
-grid(taH,'on');
-
-%set the button down function of traj_axes
-set(taH,'ButtonDownFcn',@mer_plot_callback);
+plot_traj_data(taH,ApmDataTable,DbsData)
 
 %store all critical objects as GUI data
 setappdata(hObject,'ApmDataTable',ApmDataTable);
@@ -115,6 +101,8 @@ set(gca,'Tag','disp_axes');
 set(handles.name_disp,'String',[DbsData.lastname ', ' DbsData.firstname DbsData.middlename]);
 set(handles.surgery_disp,'String',DbsData.surgery);
 set(handles.date_disp,'String',DbsData.dos);
+
+set(handles.name_disp,'ButtonDownFcn',{@name_disp_callback,DbsData});
 
 % Update handles structure
 guidata(hObject, handles);
@@ -144,10 +132,11 @@ function display_style_Callback(hObject, eventdata, handles)
 % Hints: contents = cellstr(get(hObject,'String')) returns display_style contents as cell array
 %        contents{get(hObject,'Value')} returns selected item from display_style
 
-if isappdata(handles.traj_axes,'SectionPath')
-    sectionPath = getappdata(handles.traj_axes,'SectionPath');
+if isappdata(handles.traj_axes,'PassPoint')
+    ApmDataTable = getappdata(ancestor(hObject,'Figure'),'ApmDataTable');
     style = get(handles.display_style,'Value');
-    plot_section_data(handles.disp_axes,sectionPath,style);
+    PassPoint = getappdata(handles.traj_axes,'PassPoint');
+    plot_section_data(handles.disp_axes,ApmDataTable,style,PassPoint(1),PassPoint(2));
 end
 
 
@@ -163,6 +152,16 @@ if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgr
     set(hObject,'BackgroundColor','white');
 end
 
+function name_disp_callback(src,event,DbsData)    %toggle hidden name
+figHandle = ancestor(src, 'figure');
+clickType = get(figHandle, 'SelectionType');
+if strcmp(clickType, 'alt')
+    if (strcmp(get(src,'String'),'Xxxxx, Xxxxx'))
+        set(src,'String',[DbsData.lastname ', ' DbsData.firstname DbsData.middlename]);
+    else
+        set(src,'String','Xxxxx, Xxxxx');
+    end
+end
 
 % --- Executes on button press in export_button.
 function export_button_Callback(hObject, eventdata, handles)
@@ -182,7 +181,40 @@ wavPath = getappdata(handles.traj_axes,'SectionPath');
 wavPath = sprintf('%s\\wav\\%s_Ch1.wav',path,name);
 if isfile(wavPath)
     [y, fs] = audioread(wavPath);
-    soundsc(y,fs)
+    handles.myPlayer = audioplayer(y,fs);
+    handles.myPlayer.TimerFcn = {@audio_tracker_callback,handles.disp_axes};
+    handles.myPlayer.TimerPeriod = 0.002;
+    play(handles.myPlayer)
 end
+guidata(hObject,handles);
 
 
+
+
+% --- Executes on selection change in filter_menu.
+function filter_menu_Callback(hObject, eventdata, handles)
+% hObject    handle to filter_menu (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+f = ancestor(hObject,'figure');
+ApmDataTable = getappdata(f,'ApmDataTable');
+DbsData = getappdata(f,'DbsData');
+plot_traj_data(handles.traj_axes,ApmDataTable,DbsData);
+
+
+% Hints: contents = cellstr(get(hObject,'String')) returns filter_menu contents as cell array
+%        contents{get(hObject,'Value')} returns selected item from filter_menu
+
+
+% --- Executes during object creation, after setting all properties.
+function filter_menu_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to filter_menu (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    empty - handles not created until after all CreateFcns called
+
+% Hint: popupmenu controls usually have a white background on Windows.
+%       See ISPC and COMPUTER.
+if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
+    set(hObject,'BackgroundColor','white');
+end

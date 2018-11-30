@@ -71,17 +71,14 @@ RETURNS
                     flag = 1;
                     
                     % set path to match APM file as GUI data
-                    setappdata(aH,'SectionPath',ApmDataTable{iPass}.path(iPoint));
+                    setappdata(aH,'PassPoint',[iPass iPoint]);
                     
                     % get choice of style to display APM channel data as
                     style = get(display_style,'Value');
                     
-                    plot_section_data(daH,ApmDataTable{iPass}.path(iPoint),style);   
+                    plot_section_data(daH,ApmDataTable,style,iPass,iPoint);   
                     xlabel(daH,'Seconds');
-                    
-                    % update depth text display
-                    depthH = findobj(f,'Tag','depth_disp');
-                    set(depthH,'String',['Pass ' num2str(iPass) ', Depth = ' num2str(ApmDataTable{iPass}.depth(iPoint)) 'mm']);                
+                                    
                     break
                 end
             end
