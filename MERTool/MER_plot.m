@@ -176,8 +176,9 @@ function play_audio_button_Callback(hObject, eventdata, handles)
 % hObject    handle to play_audio_button (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
-wavPath = getappdata(handles.traj_axes,'SectionPath');
-[path,name,~] = fileparts(wavPath);
+PassPoint = getappdata(handles.traj_axes,'PassPoint');
+ApmDataTable = getappdata(ancestor(hObject,'Figure'),'ApmDataTable');
+[path,name,~] = fileparts(ApmDataTable{PassPoint(1)}.path(PassPoint(2)));
 wavPath = sprintf('%s\\wav\\%s_Ch1.wav',path,name);
 if isfile(wavPath)
     [y, fs] = audioread(wavPath);
