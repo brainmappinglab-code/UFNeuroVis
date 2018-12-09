@@ -90,7 +90,8 @@ while ~isempty(filename)
         % if depth is empty, skip them
         if ~isempty(dist)
             if size(dist,1) > 1
-                error('There are two depth values associated with this section. This is a known issue that Cosmin from FHC is aware of. Please report to him with this example.');
+                msgbox('There are two depth values associated with this section. This is a known issue that Cosmin from FHC is aware of. Please report to him with this example.');
+                temp.depth(i) = dist(1,2);
             else
                 temp.depth(i) = dist(2)/1000; %depth value at the second location (timestamp at first location); convert to millimeters
             end

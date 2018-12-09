@@ -168,8 +168,7 @@ function export_button_Callback(hObject, eventdata, handles)
 % hObject    handle to export_button (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
-export_point_data(handles);
-
+export_point_data(hObject,handles);
 
 % --- Executes on button press in play_audio_button.
 function play_audio_button_Callback(hObject, eventdata, handles)
