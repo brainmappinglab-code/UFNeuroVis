@@ -1,6 +1,6 @@
 %% sEEG Definitions
-electrodeName = 'UF_sEEG_16';
-nContacts = 16;
+electrodeName = 'UF_sEEG_8';
+nContacts = 8;
 metalContactsDistance = 2;
 insulationDistance = 1.5;
 electrodeRadius = 0.4;
@@ -10,21 +10,26 @@ electrodeRadius = 0.4;
 [x,y,z] = cylinder(electrodeRadius,50);
 
 metalContact(1) = surf2patch(x, y, z * metalContactsDistance * 0.65);
-insulation(1) = surf2patch(x, y, metalContactsDistance * 0.95 + z * metalContactsDistance * 0.05);
+insulation(1) = surf2patch(x, y, metalContactsDistance * 0.65 + z * insulationDistance);
+initialHeight = metalContactsDistance * 0.65 + insulationDistance;
 for n = 2:nContacts
-    heightDisplacement = (n - 1) * (insulationDistance + metalContactsDistance);
+    heightDisplacement = (n - 2) * (insulationDistance + metalContactsDistance) + initialHeight;
     metalContact(n) = surf2patch(x, y, heightDisplacement + z * metalContactsDistance);
+    patch(x, y, heightDisplacement + z * metalContactsDistance);
     if n == nContacts
         insulation(n) = surf2patch(x, y, metalContactsDistance + heightDisplacement + z * 20);
+        patch(x, y, metalContactsDistance + heightDisplacement + z * 20);
     else
         insulation(n) = surf2patch(x, y, metalContactsDistance + heightDisplacement + z * insulationDistance);
+        patch(x, y, metalContactsDistance + heightDisplacement + z * insulationDistance);
     end
 end
 
+figure(1); clf;
 [x,y,z] = sphere(50);
-dome = surf2patch(x(1:25,:) * electrodeRadius ,y(1:25,:) * electrodeRadius ,z(1:25,:) * 0.3);
-
-axis([-10 10 -10 10 -10 heightDisplacement + 55]);
+dome = surf2patch(x(1:26,:) * electrodeRadius ,y(1:26,:) * electrodeRadius ,z(1:26,:) * 0.3);
+patch(dome);
+%axis([-10 10 -10 10 -10 heightDisplacement + 55]);
 view(-37.5,30);
 
 %% Store Information (as in LeadDBS Models)
@@ -55,3 +60,43 @@ electrode.x_position = electrode.coords_mm(1,:) + [electrodeRadius,0,0];
 electrode.y_position = electrode.coords_mm(1,:) + [0,electrodeRadius,0];
 
 save(electrodeName,'electrode');
+
+%% Visualize the Model 
+
+figure();
+clear elfv modelType
+
+count = 1;
+for n = 1:length(electrode.contacts)
+    electrode.contacts(n).vertices = [electrode.contacts(n).vertices,ones(size(electrode.contacts(n).vertices,1),1)]';
+    electrode.contacts(n).vertices = electrode.contacts(n).vertices(1:3,:)';
+    
+    elfv(count).faces = electrode.contacts(n).faces;
+    elfv(count).vertices = electrode.contacts(n).vertices;
+    modelType{count} = 'contacts';
+    count = count + 1;
+end
+
+for n = 1:length(electrode.insulation)
+    electrode.insulation(n).vertices = [electrode.insulation(n).vertices,ones(size(electrode.insulation(n).vertices,1),1)]';
+    electrode.insulation(n).vertices = electrode.insulation(n).vertices(1:3,:)';
+    
+    elfv(count).faces = electrode.insulation(n).faces;
+    elfv(count).vertices = electrode.insulation(n).vertices;
+    modelType{count} = 'insulation';
+    count = count + 1;
+end
+
+insulationIndex = 0;
+for section = 1:length(modelType)
+    if strcmpi(modelType(section),'contacts')
+        patch(elfv(section),'FaceColor',[0,0,0],'EdgeColor','None','FaceLighting','Gouraud','AmbientStrength', 0.2);
+        contactIndex = section;
+    elseif strcmpi(modelType(section),'insulation')
+        insulationIndex = insulationIndex + 1;
+        patch(elfv(section),'FaceColor',[0.8 0.8 0.8],'EdgeColor','None','FaceLighting','Gouraud','AmbientStrength', 0.2);
+    end
+end
+
+axis([-5 5 -5 5 -10 heightDisplacement + 55]);
+view(-37.5,30);
