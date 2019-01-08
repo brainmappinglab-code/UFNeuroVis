@@ -397,6 +397,10 @@ elseif strcmp(name,'UF_sEEG_14')
     handles.leadlocalization.lead.nContacts = 14;
 elseif strcmp(name,'UF_sEEG_16')
     handles.leadlocalization.lead.nContacts = 16;
+elseif strcmp(name,'UF_sEEG_10')
+    handles.leadlocalization.lead.nContacts = 10;
+elseif strcmp(name,'UF_sEEG_8')
+    handles.leadlocalization.lead.nContacts = 8;
 else
    error('We dont know how many contacts there are. Pleaese see leadLocalization.m selectLeadType function'); 
 end
