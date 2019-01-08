@@ -26,8 +26,9 @@ for n = 2:nContacts
 end
 
 figure(1); clf;
-[x,y,z] = sphere(50);
-dome = surf2patch(x(1:26,:) * electrodeRadius ,y(1:26,:) * electrodeRadius ,z(1:26,:) * 0.3);
+[x2,y2,z2] = sphere(50);
+dome = surf2patch(x2 * electrodeRadius ,y2 * electrodeRadius ,z2 * 0.3);
+
 patch(dome);
 %axis([-10 10 -10 10 -10 heightDisplacement + 55]);
 view(-37.5,30);
