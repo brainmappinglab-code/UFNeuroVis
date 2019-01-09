@@ -177,15 +177,15 @@ function play_audio_button_Callback(hObject, eventdata, handles)
 % handles    structure with handles and user data (see GUIDATA)
 PassPoint = getappdata(handles.traj_axes,'PassPoint');
 ApmDataTable = getappdata(ancestor(hObject,'Figure'),'ApmDataTable');
-[path,name,~] = fileparts(ApmDataTable{PassPoint(1)}.path(PassPoint(2)));
+[path,name,~] = fileparts(char(ApmDataTable{PassPoint(1)}.path(PassPoint(2))));
 wavPath = sprintf('%s\\wav\\%s_Ch1.wav',path,name);
-if isfile(wavPath)
+%if isfile(wavPath)
     [y, fs] = audioread(wavPath);
     handles.myPlayer = audioplayer(y,fs);
     handles.myPlayer.TimerFcn = {@audio_tracker_callback,handles.disp_axes};
     handles.myPlayer.TimerPeriod = 0.002;
     play(handles.myPlayer)
-end
+%end
 guidata(hObject,handles);
 
 
