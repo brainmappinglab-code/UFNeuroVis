@@ -9,13 +9,20 @@ electrodeRadius = 0.4;
 
 [x,y,z] = cylinder(electrodeRadius,50);
 
-metalContact(1) = surf2patch(x, y, z * metalContactsDistance * 0.65);
-insulation(1) = surf2patch(x, y, metalContactsDistance * 0.65 + z * insulationDistance);
-initialHeight = metalContactsDistance * 0.65 + insulationDistance;
+[x2,y2,z2] = sphere(50);
+dome = surf2patch(x2 * electrodeRadius ,y2 * electrodeRadius ,z2 * 0.3);
+
+metalContact = struct('faces',[],'vertices',[]);
+insulation = struct('faces',[],'vertices',[]);
+
+metalContact(1) = dome;
+metalContact(2) = surf2patch(x, y, z * metalContactsDistance * 0.65);
+insulation(1) = surf2patch(x, y, metalContactsDistance * 0.65 + z * insulationDistance * 0.6);
+initialHeight = metalContactsDistance * 0.65 + insulationDistance * 0.6;
 
 for n = 2:nContacts
     heightDisplacement = (n - 2) * (insulationDistance + metalContactsDistance) + initialHeight;
-    metalContact(n) = surf2patch(x, y, heightDisplacement + z * metalContactsDistance);
+    metalContact(n + 1) = surf2patch(x, y, heightDisplacement + z * metalContactsDistance);
     patch(x, y, heightDisplacement + z * metalContactsDistance);
     if n == nContacts
         insulation(n) = surf2patch(x, y, metalContactsDistance + heightDisplacement + z * 20);
@@ -26,22 +33,19 @@ for n = 2:nContacts
     end
 end
 
-figure(1); clf;
-[x2,y2,z2] = sphere(50);
-dome = surf2patch(x2 * electrodeRadius ,y2 * electrodeRadius ,z2 * 0.3);
-
-patch(dome);
-%axis([-10 10 -10 10 -10 heightDisplacement + 55]);
+% figure(1); clf;
+% patch(dome);
+% axis([-10 10 -10 10 -10 heightDisplacement + 55]);
 % view(-37.5,30);
 
 %% Store Information (as in LeadDBS Models)
 
 clear electrode;
 
-electrode.contacts(1).faces = cat(1,metalContact(1).faces,dome.faces);
-electrode.contacts(1).vertices = cat(1,metalContact(1).vertices,dome.vertices);
+% electrode.contacts(1).faces = cat(1,metalContact(1).faces,dome.faces);
+% electrode.contacts(1).vertices = cat(1,metalContact(1).vertices,dome.vertices);
 
-for n = 2:length(metalContact)
+for n = 1:length(metalContact)
     electrode.contacts(n).faces = metalContact(n).faces;
     electrode.contacts(n).vertices = metalContact(n).vertices;
     electrode.coords_mm(n,1:3) = [0,0,mean(metalContact(n).vertices(:,3))];
@@ -61,7 +65,7 @@ electrode.tail_position = electrode.coords_mm(end,:);
 electrode.x_position = electrode.coords_mm(1,:) + [electrodeRadius,0,0];
 electrode.y_position = electrode.coords_mm(1,:) + [0,electrodeRadius,0];
 
-save(electrodeName,'electrode');
+save([getenv('NEURO_VIS_PATH'),filesep,'leadModels',filesep,electrodeName,'.mat'],'electrode');
 
 %% Visualize the Model 
 
