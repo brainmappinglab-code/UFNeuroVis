@@ -6,9 +6,9 @@ UFNeuroVis_setEnv;
 
 %teee
 %% Step 0: Setups
-root = 'C:\Users\eisinger\Documents\CT_MRI_Analysis\RamirezElkouzi_RescuePatientsLeadLocalization\Lauren_Processed';
-subjs = {'2164','2164'};%
-
+root = 'C:\Users\eisinger\Documents\GoNoGo\CMTargeting\LeadLocations\';
+subjs = {'TS02','TS03','TS04_New','TS05','TS06'};%
+%subjs = {'TS06'};
 %% generate list of patient directories
 dirc = [];
 for i = 1:length(subjs)
