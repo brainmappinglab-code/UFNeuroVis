@@ -1,5 +1,5 @@
 %% sEEG Definitions
-nContacts = 8;
+nContacts = 16;
 electrodeName = sprintf('UF_sEEG_%d',nContacts);
 metalContactsDistance = 2;
 insulationDistance = 1.5;
@@ -10,15 +10,16 @@ electrodeRadius = 0.4;
 [x,y,z] = cylinder(electrodeRadius,50);
 
 [x2,y2,z2] = sphere(50);
-dome = surf2patch(x2 * electrodeRadius ,y2 * electrodeRadius ,z2 * 0.3);
+tipLength = 0.3;
+dome = surf2patch(x2 * electrodeRadius ,y2 * electrodeRadius ,z2 * tipLength + tipLength);
 
 metalContact = struct('faces',[],'vertices',[]);
 insulation = struct('faces',[],'vertices',[]);
 
 metalContact(1) = dome;
-metalContact(2) = surf2patch(x, y, z * metalContactsDistance * 0.65);
-insulation(1) = surf2patch(x, y, metalContactsDistance * 0.65 + z * insulationDistance * 0.6);
-initialHeight = metalContactsDistance * 0.65 + insulationDistance * 0.6;
+metalContact(2) = surf2patch(x, y, z * metalContactsDistance * 0.85 + tipLength);
+insulation(1) = surf2patch(x, y, metalContactsDistance * 0.85 + z * insulationDistance + tipLength);
+initialHeight = metalContactsDistance + insulationDistance;
 
 for n = 2:nContacts
     heightDisplacement = (n - 2) * (insulationDistance + metalContactsDistance) + initialHeight;
@@ -33,7 +34,7 @@ for n = 2:nContacts
     end
 end
 
-% figure(1); clf;
+% figure; clf;
 % patch(dome);
 % axis([-10 10 -10 10 -10 heightDisplacement + 55]);
 % view(-37.5,30);
