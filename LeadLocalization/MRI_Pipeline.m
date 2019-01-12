@@ -139,7 +139,7 @@ elseif isempty(dir([Processed_DIR,filesep,'postop_ct.nii']))
             return;
     end
 elseif TRANSFORMED==true
-    switch 4
+    switch 1
         case 1
             postop_CT = loadNifTi([Processed_DIR,filesep,'postop_ct.nii']);
             [coregistered_CT, tform] = coregisterMRI(preop_T1_acpc, postop_CT);
@@ -157,7 +157,6 @@ elseif TRANSFORMED==true
             disp('Done with coregstration ANTs!');
             COREGISTERED=true;
     end
-    
 end
 
 %% Step 4.5: Repeat the same process for T2 MRI as well (Optional)
