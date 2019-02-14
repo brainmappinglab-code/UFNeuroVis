@@ -1,7 +1,7 @@
 %% Setup
 clear; clc; close all;
 UFNeuroVis_setEnv;
-Processed_DIR = ['\\gunduz-lab.bme.ufl.edu\Data\ET CL Wearable Sensors\Beauvais00965514_20181107',filesep,'Processed'];
+Processed_DIR = ['\\gunduz-lab.bme.ufl.edu\Data\ET CL Wearable Sensors\-------------',filesep,'Processed'];
 
 %% Load Preop-CT and Postop-CT
 

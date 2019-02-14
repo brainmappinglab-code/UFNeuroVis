@@ -112,7 +112,52 @@ leadLocalization(preop_T1_acpc, coregistered_CT, Processed_DIR);
 
 %% Step 7: Normalization (What is normalization? Never heard of it)
 preop_T1_acpc = loadNifTi([Processed_DIR,filesep,'anat_t1_acpc.nii']);
-BovaAtlasFitter(preop_T1_acpc);
+BovaAtlasFitter(preop_T1_acpc,Processed_DIR,NEURO_VIS_PATH);
+
+%% Step 8: reverse normalize atlases
+bovaFits = dir([Processed_DIR,filesep,'BOVAFit*']);
+bovaFits.folder = [Processed_DIR,filesep];
+if ~isempty(bovaFits)
+    bovaFit = bovaFits(1);
+    BovaTransform = load(fullfile(bovaFit.folder,bovaFit.name));
+    
+    % Transform Left Lead if Left Atlas Morph Exist
+    if isfield(BovaTransform,'Left')
+        leftLeads = dir([Processed_DIR,filesep,'LEAD_Left*.mat']);
+        for n = 1:length(leftLeads)
+            leadInfo = load([Processed_DIR,filesep,leftLeads(n).name]);
+            T = computeTransformMatrix(BovaTransform.Left.Translation,BovaTransform.Left.Scale,BovaTransform.Left.Rotation);
+            m = matfile([Processed_DIR,filesep,'BOVA_',leftLeads(n).name],'Writable',true);
+            m.Side = leadInfo.Side;
+            m.Type = leadInfo.Type;
+            m.nContacts = leadInfo.nContacts;
+            newDistal = [leadInfo.Distal, 1] / T;
+            m.Distal = newDistal(1:3);
+            newProximal = [leadInfo.Proximal, 1] / T;
+            m.Proximal = newProximal(1:3);
+        end
+    end
+    
+    % Transform Right Lead if Right Atlas Morph Exist
+    if isfield(BovaTransform,'Right')
+        rightLeads = dir([Processed_DIR,filesep,'LEAD_Right*.mat']);
+        for n = 1:length(rightLeads)
+            leadInfo = load([Processed_DIR,filesep,rightLeads(n).name]);
+            T = computeTransformMatrix(BovaTransform.Right.Translation,BovaTransform.Right.Scale,BovaTransform.Right.Rotation);
+            m = matfile([Processed_DIR,filesep,'BOVA_',rightLeads(n).name],'Writable',true);
+            m.Side = leadInfo.Side;
+            m.Type = leadInfo.Type;
+            m.nContacts = leadInfo.nContacts;
+            newDistal = [leadInfo.Distal, 1] / T;
+            m.Distal = newDistal(1:3);
+            newProximal = [leadInfo.Proximal, 1] / T;
+            m.Proximal = newProximal(1:3);
+        end
+    end
+end
+
+
+
 
 %% EXTRA 1: Use UF Transform Matrix during OR Planning
 
