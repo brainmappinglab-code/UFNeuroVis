@@ -160,19 +160,28 @@ switch handles.viewDimension
         [~,viewIndexY] = min(abs(handles.coRegistered.ZRange - currentCenter(1,2)));
         viewIndexX = min(max(1-Range(1),viewIndexX),handles.coRegistered.dimension(2)-Range(2));
         viewIndexY = min(max(1-Range(1),viewIndexY),handles.coRegistered.dimension(3)-Range(2));
-        handles.slice = image(handles.sliceView, handles.coRegistered.YRange(viewIndexX + Range), handles.coRegistered.ZRange(viewIndexY + Range), squeeze(handles.overlayImage(handles.coRegistered.sliceIndex(1), viewIndexX + Range, viewIndexY + Range))' * handles.colormapResolution);
+        % Check if clicked outside the boundary of the scan
+        if viewIndexX + Range(end) < length(handles.coRegistered.YRange) && viewIndexX~=(1-Range(1)) && viewIndexY + Range(end) < length(handles.coRegistered.ZRange)
+            handles.slice = image(handles.sliceView, handles.coRegistered.YRange(viewIndexX + Range), handles.coRegistered.ZRange(viewIndexY + Range), squeeze(handles.overlayImage(handles.coRegistered.sliceIndex(1), viewIndexX + Range, viewIndexY + Range))' * handles.colormapResolution);
+        end
     case 2
         [~,viewIndexX] = min(abs(handles.coRegistered.XRange - currentCenter(1,1)));
         [~,viewIndexY] = min(abs(handles.coRegistered.ZRange - currentCenter(1,2)));
         viewIndexX = min(max(1-Range(1),viewIndexX),handles.coRegistered.dimension(1)-Range(2));
         viewIndexY = min(max(1-Range(1),viewIndexY),handles.coRegistered.dimension(3)-Range(2));
-        handles.slice = image(handles.sliceView, handles.coRegistered.XRange(viewIndexX + Range), handles.coRegistered.ZRange(viewIndexY + Range), squeeze(handles.overlayImage(viewIndexX + Range, handles.coRegistered.sliceIndex(2), viewIndexY + Range))' * handles.colormapResolution);
+        % Check if clicked outside the boundary of the scan
+        if viewIndexX + Range(end) < length(handles.coRegistered.XRange) && viewIndexX~=(1-Range(1)) && viewIndexY + Range(end) < length(handles.coRegistered.ZRange)
+            handles.slice = image(handles.sliceView, handles.coRegistered.XRange(viewIndexX + Range), handles.coRegistered.ZRange(viewIndexY + Range), squeeze(handles.overlayImage(viewIndexX + Range, handles.coRegistered.sliceIndex(2), viewIndexY + Range))' * handles.colormapResolution);
+        end
     case 3
         [~,viewIndexX] = min(abs(handles.coRegistered.XRange - currentCenter(1,1)));
         [~,viewIndexY] = min(abs(handles.coRegistered.YRange - currentCenter(1,2)));
         viewIndexX = min(max(1-Range(1),viewIndexX),handles.coRegistered.dimension(1)-Range(2));
         viewIndexY = min(max(1-Range(1),viewIndexY),handles.coRegistered.dimension(2)-Range(2));
-        handles.slice = image(handles.sliceView, handles.coRegistered.XRange(viewIndexX + Range), handles.coRegistered.YRange(viewIndexY + Range), squeeze(handles.overlayImage(viewIndexX + Range, viewIndexY + Range, handles.coRegistered.sliceIndex(3)))' * handles.colormapResolution);
+        % Check if clicked outside the boundary of the scan
+        if viewIndexX + Range(end) < length(handles.coRegistered.XRange) && viewIndexX~=(1-Range(1)) && viewIndexY + Range(end) < length(handles.coRegistered.YRange)
+            handles.slice = image(handles.sliceView, handles.coRegistered.XRange(viewIndexX + Range), handles.coRegistered.YRange(viewIndexY + Range), squeeze(handles.overlayImage(viewIndexX + Range, viewIndexY + Range, handles.coRegistered.sliceIndex(3)))' * handles.colormapResolution);
+        end
 end
 guidata(handles.gui, handles);
 drawnow;
@@ -186,25 +195,37 @@ switch handles.viewDimension
         [~,viewIndexY] = min(abs(handles.coRegistered.ZRange - currentCenter(1,2)));
         viewIndexX = min(max(1-Range(1),viewIndexX),handles.coRegistered.dimension(2)-Range(end));
         viewIndexY = min(max(1-Range(1),viewIndexY),handles.coRegistered.dimension(3)-Range(end));
-        handles.slice.XData = handles.coRegistered.YRange(viewIndexX + Range);
-        handles.slice.YData = handles.coRegistered.ZRange(viewIndexY + Range);
-        handles.slice.CData = squeeze(handles.overlayImage(handles.coRegistered.sliceIndex(1), viewIndexX + Range, viewIndexY + Range))' * handles.colormapResolution;
+        % Check if clicked outside the boundary of the scan and if the image handle is
+        % valid
+        if viewIndexX + Range(end) < length(handles.coRegistered.YRange) && viewIndexX~=(1-Range(1)) && viewIndexY + Range(end) < length(handles.coRegistered.ZRange) && isvalid(handles.slice)
+            handles.slice.XData = handles.coRegistered.YRange(viewIndexX + Range);
+            handles.slice.YData = handles.coRegistered.ZRange(viewIndexY + Range);
+            handles.slice.CData = squeeze(handles.overlayImage(handles.coRegistered.sliceIndex(1), viewIndexX + Range, viewIndexY + Range))' * handles.colormapResolution;
+        end
     case 2
         [~,viewIndexX] = min(abs(handles.coRegistered.XRange - currentCenter(1,1)));
         [~,viewIndexY] = min(abs(handles.coRegistered.ZRange - currentCenter(1,2)));
         viewIndexX = min(max(1-Range(1),viewIndexX),handles.coRegistered.dimension(1)-Range(end));
         viewIndexY = min(max(1-Range(1),viewIndexY),handles.coRegistered.dimension(3)-Range(end));
-        handles.slice.XData = handles.coRegistered.XRange(viewIndexX + Range);
-        handles.slice.YData = handles.coRegistered.ZRange(viewIndexY + Range);
-        handles.slice.CData = squeeze(handles.overlayImage(viewIndexX + Range, handles.coRegistered.sliceIndex(2), viewIndexY + Range))' * handles.colormapResolution; 
+        % Check if clicked outside the boundary of the scan and if the image handle is
+        % valid
+        if viewIndexX + Range(end) < length(handles.coRegistered.XRange) && viewIndexX~=(1-Range(1)) && viewIndexY + Range(end) < length(handles.coRegistered.ZRange) && isvalid(handles.slice)
+            handles.slice.XData = handles.coRegistered.XRange(viewIndexX + Range);
+            handles.slice.YData = handles.coRegistered.ZRange(viewIndexY + Range);
+            handles.slice.CData = squeeze(handles.overlayImage(viewIndexX + Range, handles.coRegistered.sliceIndex(2), viewIndexY + Range))' * handles.colormapResolution; 
+        end
     case 3
         [~,viewIndexX] = min(abs(handles.coRegistered.XRange - currentCenter(1,1)));
         [~,viewIndexY] = min(abs(handles.coRegistered.YRange - currentCenter(1,2)));
         viewIndexX = min(max(1-Range(1),viewIndexX),handles.coRegistered.dimension(1)-Range(end));
         viewIndexY = min(max(1-Range(1),viewIndexY),handles.coRegistered.dimension(2)-Range(end));
-        handles.slice.XData = handles.coRegistered.XRange(viewIndexX + Range);
-        handles.slice.YData = handles.coRegistered.YRange(viewIndexY + Range);
-        handles.slice.CData = squeeze(handles.overlayImage(viewIndexX + Range, viewIndexY + Range, handles.coRegistered.sliceIndex(3)))' * handles.colormapResolution;
+        % Check if clicked outside the boundary of the scan and if the image handle is
+        % valid
+        if viewIndexX + Range(end) < length(handles.coRegistered.XRange) && viewIndexX~=(1-Range(1)) && viewIndexY + Range(end) < length(handles.coRegistered.YRange) && isvalid(handles.slice)
+            handles.slice.XData = handles.coRegistered.XRange(viewIndexX + Range);
+            handles.slice.YData = handles.coRegistered.YRange(viewIndexY + Range);
+            handles.slice.CData = squeeze(handles.overlayImage(viewIndexX + Range, viewIndexY + Range, handles.coRegistered.sliceIndex(3)))' * handles.colormapResolution;
+        end
 end
 guidata(handles.gui, handles);
 drawnow;
