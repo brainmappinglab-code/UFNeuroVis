@@ -73,11 +73,11 @@ else
 	fprintf('MRI Upsampling to 0.5mm spacing complete.\n');
 	
 	% Spatial Filtering
-	preop_T1_filtered = spatialFilter(preop_T1_upsampled, 'diffusion');
-	save_nii(preop_T1_filtered,[Processed_DIR,filesep,'anat_t1_filtered.nii']);
-	preop_T1 = preop_T1_filtered;
-	fprintf('MRI Spatial Filter with Diffusion Filter complete.\n');
-    MRIFILTERED=true;
+% 	preop_T1_filtered = spatialFilter(preop_T1_upsampled, 'diffusion');
+% 	save_nii(preop_T1_filtered,[Processed_DIR,filesep,'anat_t1_filtered.nii']);
+% 	preop_T1 = preop_T1_filtered;
+% 	fprintf('MRI Spatial Filter with Diffusion Filter complete.\n');
+%     MRIFILTERED=true;
 end
 
 %% Step 3: Transform the MRI Brain to AC-PC Coordinates
