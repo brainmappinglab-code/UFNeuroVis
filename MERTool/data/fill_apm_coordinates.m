@@ -16,6 +16,12 @@ RETURNS
 %get number of passes
 nPass = size(DbsData.trackinfo,1);
 
+if (nPass ~= size(ApmDataTable,2))
+    error("ERROR: when building ApmDataTable, number of passes in APM files and DBS files do not match.")
+    %TODO escape GUI here
+    return;
+end
+
 %preallocate space for entry point arrays
 LtEntryPoint = zeros(nPass,1);
 ApEntryPoint = zeros(nPass,1);
@@ -43,7 +49,7 @@ end
 CTR = CrwData.clineangle ;
 ACPC = CrwData.acpcangle ;
 
-for iPass = 1:nPass    
+for iPass = 1:nPass
     %extract T values (depths from ApmDataTable column 1)
     T = [ApmDataTable{iPass}.depth];
     

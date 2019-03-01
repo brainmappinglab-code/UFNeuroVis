@@ -9,14 +9,17 @@ OG_ApmDataTable = ApmDataTable;
 hold(aH,'on');
 
 f = ancestor(aH,'figure');
-filter_menu = findobj(f,'Tag','filter_menu');
-filter_value = get(filter_menu,'Value');
+cell_type_filter_menu = findobj(f,'Tag','cell_type_filter_menu');
+cell_type_filter_value = get(cell_type_filter_menu,'Value');
+duration_filter_menu = findobj(f,'Tag','duration_filter_menu');
+duration_filter_value = get(duration_filter_menu,'Value');
 
 %get number of passes
 nPass = size(ApmDataTable,2);
 
-if (filter_value ~= 1)
-    filter = num2str(filter_value - 1);
+%filter out cell types that don't match selection
+if (cell_type_filter_value ~= 1)
+    filter = num2str(cell_type_filter_value - 1);
     for iPass = 1:nPass
         N = size(ApmDataTable{iPass},1);
         toDelete = [];
@@ -26,6 +29,34 @@ if (filter_value ~= 1)
                 toDelete = [toDelete i];
             elseif DbsData.data1{match,3,iPass} ~= filter
                 toDelete = [toDelete i];
+            end
+        end
+        ApmDataTable{iPass}(toDelete,:) = [];
+    end
+end
+
+%filter out durations
+if (duration_filter_value ~= 1)
+    for iPass = 1:nPass
+        N = size(ApmDataTable{iPass},1);
+        toDelete = [];
+        for i = 1:N
+            duration = ApmDataTable{iPass}.duration(i);
+            switch duration_filter_value
+                case 2 % '> 1s'
+                    if duration < 1
+                        toDelete = [toDelete i];
+                    end
+                case 3 % '> 5s'
+                    if duration < 5
+                        toDelete = [toDelete i];
+                    end
+                case 4 % '> 10s'
+                    if duration < 10
+                        toDelete = [toDelete i];
+                    end
+                otherwise
+                    error('Value of duration_filter_menu is undefined. Define in plot_traj_data')
             end
         end
         ApmDataTable{iPass}(toDelete,:) = [];

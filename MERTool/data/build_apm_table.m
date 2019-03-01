@@ -10,13 +10,17 @@ ARGS
 RETURNS
     ApmDataTable: cell array with entries defined below:
 
-            ApmDataTable{pass}."field"(point)
+            ApmDataTable{pass}.<field>(point)
                                depth
                                path
+                               duration
                                x
                                y
                                z
                                match
+    WARNING:
+        if changing fields of ApmDataTable, it will invalidate saved
+        ApmDataTables. delete them and they will be remade
 %}
 
 if ~nargin
@@ -50,13 +54,14 @@ end
 if verLessThan('matlab','9.4') % older than 2018a
     depth = zeros(12,1);
     path = strings(12,1);
+    duration = zeros(12,1);
     x = zeros(12,1);
     y = zeros(12,1);
     z = zeros(12,1);
     match = zeros(12,1);
-    talloc = table(depth,path,x,y,z,match);
+    talloc = table(depth,path,duration,x,y,z,match);
 else
-    talloc = table('Size',[12 6],'VariableTypes',{'double', 'string', 'double', 'double', 'double','double'},'VariableName',{'depth','path','x','y','z','match'});
+    talloc = table('Size',[12 7],'VariableTypes',{'double', 'string', 'double', 'double', 'double', 'double','double'},'VariableName',{'depth','path','duration','x','y','z','match'});
 end
 ApmDataTable = {};
 sprintf('%s',tF.name)
@@ -83,10 +88,12 @@ while ~isempty(filename)
         path = string(strcat(glrPath,'\',filename(i)));
         t = APMReadData(path);
         dist = t.drive_data(1).depth; %sometimes multiple drive_data are recorded in each section if there are multiple passes activated at once
+        dur = size(t.channels.continuous,2)/t.channels.sampling_frequency; %divide no. of samples by sample frequency
         if i > size(temp,1)
             temp = [temp;talloc];
         end
         temp.path(i) = path; %path
+        temp.duration(i) = dur;
         % if depth is empty, skip them
         if ~isempty(dist)
             if size(dist,1) > 1

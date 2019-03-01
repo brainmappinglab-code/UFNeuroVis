@@ -22,7 +22,7 @@ function varargout = MER_plot(varargin)
 
 % Edit the above text to modify the response to help MER_plot
 
-% Last Modified by GUIDE v2.5 23-Nov-2018 23:02:11
+% Last Modified by GUIDE v2.5 01-Mar-2019 14:07:26
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 1;
@@ -191,25 +191,22 @@ guidata(hObject,handles);
 
 
 
-% --- Executes on selection change in filter_menu.
-function filter_menu_Callback(hObject, eventdata, handles)
-% hObject    handle to filter_menu (see GCBO)
+% --- Executes on selection change in cell_type_filter_menu.
+function cell_type_filter_menu_Callback(hObject, eventdata, handles)
+% hObject    handle to calling cell_type_filter_menu (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
-
 f = ancestor(hObject,'figure');
 ApmDataTable = getappdata(f,'ApmDataTable');
 DbsData = getappdata(f,'DbsData');
 plot_traj_data(handles.traj_axes,ApmDataTable,DbsData);
-
-
-% Hints: contents = cellstr(get(hObject,'String')) returns filter_menu contents as cell array
-%        contents{get(hObject,'Value')} returns selected item from filter_menu
+% Hints: contents = cellstr(get(hObject,'String')) returns cell_type_filter_menu contents as cell array
+%        contents{get(hObject,'Value')} returns selected item from cell_type_filter_menu
 
 
 % --- Executes during object creation, after setting all properties.
-function filter_menu_CreateFcn(hObject, eventdata, handles)
-% hObject    handle to filter_menu (see GCBO)
+function cell_type_filter_menu_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to cell_type_filter_menu (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    empty - handles not created until after all CreateFcns called
 
@@ -218,3 +215,49 @@ function filter_menu_CreateFcn(hObject, eventdata, handles)
 if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
     set(hObject,'BackgroundColor','white');
 end
+
+
+% --- Executes on selection change in duration_filter_menu.
+function duration_filter_menu_Callback(hObject, eventdata, handles)
+% hObject    handle to duration_filter_menu (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+f = ancestor(hObject,'figure');
+ApmDataTable = getappdata(f,'ApmDataTable');
+DbsData = getappdata(f,'DbsData');
+plot_traj_data(handles.traj_axes,ApmDataTable,DbsData);
+% Hints: contents = cellstr(get(hObject,'String')) returns duration_filter_menu contents as cell array
+%        contents{get(hObject,'Value')} returns selected item from duration_filter_menu
+
+
+% --- Executes during object creation, after setting all properties.
+function duration_filter_menu_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to duration_filter_menu (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    empty - handles not created until after all CreateFcns called
+
+% Hint: popupmenu controls usually have a white background on Windows.
+%       See ISPC and COMPUTER.
+if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
+    set(hObject,'BackgroundColor','white');
+end
+
+
+% --- Executes on button press in wave_clus_button.
+function wave_clus_button_Callback(hObject, eventdata, handles)
+% hObject    handle to wave_clus_button (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+f = ancestor(hObject,'Figure');
+[path,~,~] = fileparts(getappdata(f,'dest'))
+obj_h = get(handles.disp_axes,'children');
+data = get(obj_h,'YData');
+sr = 48000;
+current_path = pwd;
+cd(path)
+save('wave_clus.mat','data','sr')
+cd(current_path)
+wave_clus([path '\wave_clus.mat'])
+cd(current_path)
+
+

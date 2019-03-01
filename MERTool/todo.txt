@@ -1,9 +1,9 @@
-TODO 1. select ignore or linear for out of range depths
+TODO 1. select ignore or linear for out of range depths when building apm table
 TODO 2. firing rate display
 TODO 7. whitespace to MER graph?
 TODO 9. under best match, show "Num Cells: X", and color code cells in the Spikes-line drop down
-
-
-FIXED 4. doesn't seem to be finding the closest match right now?
 TODO 10. audio - controls, delete marker after play stops
 TODO 11. some filters don't seem to be working (Bord, etc.)
+
+TODO 13. fix bugged patients
+TODO 14. fill_apm_coordinates - escape GUI on failure
