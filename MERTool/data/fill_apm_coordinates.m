@@ -22,10 +22,9 @@ if (nPass ~= size(ApmDataTable,2))
     return;
 end
 
-%preallocate space for entry point arrays
-LtEntryPoint = zeros(nPass,1);
-ApEntryPoint = zeros(nPass,1);
-AxEntryPoint = zeros(nPass,1);
+LtTargetPoint = zeros(nPass,1);
+ApTargetPoint = zeros(nPass,1);
+AxTargetPoint = zeros(nPass,1);
 
 %calculate entry point coordinates from CRW and DBS data
 %       CrwData.entrypoint(n) contains AP/LT/AX base coordinates
@@ -33,16 +32,16 @@ AxEntryPoint = zeros(nPass,1);
 %       DbsData.trackinfo(i,n+1) contains adjustment distance
 for i = 1:nPass
     if (DbsData.trackinfo(i,2) == 2)
-        ApEntryPoint(i) = CrwData.entrypoint(1) + DbsData.trackinfo(i,3);
+        ApTargetPoint(i) = CrwData.functargpoint(1) + DbsData.trackinfo(i,3);
     elseif (DbsData.trackinfo(i,2) == 3)
-        ApEntryPoint(i) = CrwData.entrypoint(1) - DbsData.trackinfo(i,3);
+        ApTargetPoint(i) = CrwData.functargpoint(1) - DbsData.trackinfo(i,3);
     end
     if (DbsData.trackinfo(i,4) == 2)
-        LtEntryPoint(i) = CrwData.entrypoint(2) + DbsData.trackinfo(i,5);
+        LtTargetPoint(i) = CrwData.functargpoint(2) + DbsData.trackinfo(i,5);
     elseif (Dbs.trackinfo(i,4) == 3)
-        LtEntryPoint(i) = CrwData.entrypoint(2) - DbsData.trackinfo(i,5);
+        LtTargetPoint(i) = CrwData.functargpoint(2) - DbsData.trackinfo(i,5);
     end
-    AxEntryPoint(i) = CrwData.entrypoint(3);
+    AxTargetPoint(i) = CrwData.functargpoint(3);
 end
 
 %extract crw data for calculating xyz coordinates
@@ -51,11 +50,11 @@ ACPC = CrwData.acpcangle ;
 
 for iPass = 1:nPass
     %extract T values (depths from ApmDataTable column 1)
-    T = [ApmDataTable{iPass}.depth];
+    T = 30 - ApmDataTable{iPass}.depth;
     
     for iPoint = 1:size(T,1)
-        ApmDataTable{iPass}.x(iPoint) = LtEntryPoint(iPass) -(T(iPoint) * sind(CTR));
-        ApmDataTable{iPass}.y(iPoint) = ApEntryPoint(iPass) - (T(iPoint) * cosd(ACPC) * cosd(CTR)) ;
-        ApmDataTable{iPass}.z(iPoint) = AxEntryPoint(iPass) - (T(iPoint) * sind(ACPC) * cosd(CTR));
+        ApmDataTable{iPass}.x(iPoint) = LtTargetPoint(iPass) + (T(iPoint) * sind(CTR));
+        ApmDataTable{iPass}.y(iPoint) = ApTargetPoint(iPass) + (T(iPoint) * cosd(ACPC) * cosd(CTR)) ;
+        ApmDataTable{iPass}.z(iPoint) = AxTargetPoint(iPass) + (T(iPoint) * sind(ACPC) * cosd(CTR));
     end
 end

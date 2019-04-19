@@ -34,21 +34,27 @@ tF = dir([glrPath '\*.apm']);
 if isempty(tF)
     % look for GLR files at apmPath
     tGLR = dir([glrPath '\*.glr']);
-    answer = questdlg(['No .apm files found at that location. Do you want to use data from ' tGLR.name '? (This may take a while.)'],'MER tool');
-    if strcmp(answer,'No') || strcmp(answer,'Cancel')
-        ApmDataTable = [];
-        f = errordlg('No .apm files given');
-        waitfor(f);
+    if isempty(tGLR)
+        % it might be older files
+        ApmDataTable = build_apm_table_from_old(glrPath);
         return
+    else
+        answer = questdlg(['No .apm files found at that location. Do you want to use data from ' tGLR.name '? (This may take a while.)'],'MER tool');
+        if strcmp(answer,'No') || strcmp(answer,'Cancel')
+            ApmDataTable = [];
+            f = errordlg('No .apm files given');
+            waitfor(f);
+            return
+        end
+        w = waitbar(0,'Unpacking GLR file...','Name','Progress');
+
+        ReadGLR_Exporter(['"' tGLR.folder '\' tGLR.name '"'],['"' tGLR.folder '"'],'"apm"','"distancefromzero"');
+
+        close(w);
+
+        % try again for a file list
+        tF = dir([glrPath '\*.apm']);
     end
-    w = waitbar(0,'Unpacking GLR file...','Name','Progress');
-    
-    ReadGLR_Exporter(['"' tGLR.folder '\' tGLR.name '"'],['"' tGLR.folder '"'],'"apm"','"distancefromzero"');
-    
-    close(w);
-    
-    % try again for a file list
-    tF = dir([glrPath '\*.apm']);
 end
 
 if verLessThan('matlab','9.4') % older than 2018a

@@ -16,6 +16,18 @@ RETURNS
     if iPoint ~= 0 && iPass ~= 0
         match = ApmDataTable{iPass}.match(iPoint);
         display_match(aH,match,iPass);
+        
+        audio_ret = audio_tracker_create(aH,ApmDataTable,iPass,iPoint);
+        
+        f = ancestor(aH,'figure');
+        handles = guidata(f);
+        set(handles.wave_clus_button,'enable','on')
+        set(handles.export_button,'enable','on')
+        if audio_ret
+            set(handles.play_audio_button,'enable','on')
+            set(handles.pause_audio_button,'enable','on')
+        end
+        guidata(f,handles)
     end    
 
 end

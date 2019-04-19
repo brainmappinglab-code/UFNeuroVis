@@ -22,7 +22,7 @@ function varargout = MER_plot(varargin)
 
 % Edit the above text to modify the response to help MER_plot
 
-% Last Modified by GUIDE v2.5 01-Mar-2019 14:07:26
+% Last Modified by GUIDE v2.5 11-Apr-2019 14:16:32
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 1;
@@ -98,7 +98,8 @@ setappdata(hObject,'dest',dest);
 set(gca,'Tag','disp_axes');
 
 %fill patient info into GUI
-set(handles.name_disp,'String',[DbsData.lastname ', ' DbsData.firstname DbsData.middlename]);
+name = [DbsData.lastname ', ' DbsData.firstname DbsData.middlename];
+set(handles.name_disp,'String',name);
 set(handles.surgery_disp,'String',DbsData.surgery);
 set(handles.date_disp,'String',DbsData.dos);
 
@@ -175,17 +176,8 @@ function play_audio_button_Callback(hObject, eventdata, handles)
 % hObject    handle to play_audio_button (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
-PassPoint = getappdata(handles.traj_axes,'PassPoint');
-ApmDataTable = getappdata(ancestor(hObject,'Figure'),'ApmDataTable');
-[path,name,~] = fileparts(char(ApmDataTable{PassPoint(1)}.path(PassPoint(2))));
-wavPath = sprintf('%s\\wav\\%s_Ch1.wav',path,name);
-%if isfile(wavPath)
-    [y, fs] = audioread(wavPath);
-    handles.myPlayer = audioplayer(y,fs);
-    handles.myPlayer.TimerFcn = {@audio_tracker_callback,handles.disp_axes};
-    handles.myPlayer.TimerPeriod = 0.002;
-    play(handles.myPlayer)
-%end
+
+play(handles.myPlayer)
 guidata(hObject,handles);
 
 
@@ -261,3 +253,35 @@ wave_clus([path '\wave_clus.mat'])
 cd(current_path)
 
 
+
+
+% --- Executes on button press in pause_audio_button.
+function pause_audio_button_Callback(hObject, eventdata, handles)
+% hObject    handle to pause_audio_button (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+if (isplaying(handles.myPlayer))
+    codedstring = '\u23ef'; % resume label
+    decodedstring = sprintf(strrep(codedstring, '\u', '\x'));
+    set(hObject,'String',decodedstring);
+    
+    pause(handles.myPlayer)
+    
+    aH = handles.disp_axes;
+    lH = findobj(aH,'Type','Line');
+    if (isappdata(aH,'marker'))
+        marker = getappdata(aH,'marker');
+        delete(marker);
+    end
+    n = handles.myPlayer.CurrentSample;
+    x = get(lH,'Xdata');
+    marker = line(aH,[x(n) x(n)],get(aH,'YLim'),'color',[1 0 0]);
+    setappdata(aH,'marker',marker);
+elseif (handles.myPlayer.CurrentSample ~= 1)
+    codedstring = '\u23f8'; % pause label
+    decodedstring = sprintf(strrep(codedstring, '\u', '\x'));
+    set(hObject,'String',decodedstring);
+    
+    resume(handles.myPlayer);
+end
+guidata(hObject,handles)

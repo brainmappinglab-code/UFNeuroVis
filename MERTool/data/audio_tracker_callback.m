@@ -12,11 +12,6 @@ if (myPlayer.Running == 'on')
     x = get(lH,'Xdata');
     marker = line(aH,[x(n) x(n)],get(aH,'YLim'),'color',[1 0 0]);
     setappdata(aH,'marker',marker);
-elseif (myPlayer.Running == 'off')
-    if (isappdata(aH,'marker'))
-        marker = getappdata(aH,'marker');
-        delete(marker);
-    end
 end
 
 
