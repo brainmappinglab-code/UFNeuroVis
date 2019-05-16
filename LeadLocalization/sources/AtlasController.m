@@ -1,4 +1,22 @@
 function AtlasController(AtlasInfo, AtlasPatch, varargin)
+% AtlasController(AtlasInfo, AtlasPatch [, state(s)])
+%   plots the specified patches/atlases with the leads
+%   
+%   optionally you can specify the default state for the atlas (toggled on
+%   or off) as the third argument
+%   AtlasController(AtlasInfo, AtlasPatch, state)
+%   state: - false, all toggled off (not visible) 
+%          - true, all toggled on (visible) 
+%          - as vector specifying 1 or 0 (true or false) for each structure
+%          specified in AtlasInfo/AtlasPatch. It needs to have the same
+%          number of elements.
+%          - as 2 cell array, first is left, second is right 
+%          e.g. states={};
+%               states{1}=[0 0 0 0 0 0 0 0 0 0 1 1 1 1 1];%left
+%               states{2}=[0 0 0 0 0 0 0 0 0 0 1 1 1 1 1];%right
+%               AtlasController(AtlasInfo, AtlasPatch, states);
+%
+
 
 handles.gui = largeFigure(101, [200 700]); clf(handles.gui);
 set(handles.gui, 'Name', 'Atlas Controller', 'Units', 'Normalized');
@@ -45,7 +63,49 @@ end
 guidata(handles.gui, handles);
 
 function handles = toggleAll(handles, state)
-if ~state
+if length(state)>1
+    %if state is an array, duplicate it and use it to toggle
+    
+    if ~iscell(state)
+        if length(handles.AtlasControl.Left)~=length(state)
+            error(sprintf('toggle state vector (for right) needs to have the same num of elements as the atlas specified :  %d \n',length(handles.AtlasControl.Left)))
+        end
+    
+        state2{1}=state;
+        state2{2}=state;
+        state=state2;
+    end
+        
+    if length(handles.AtlasControl.Left)~=length(state{1})
+        error(sprintf('toggle state vector (for left) needs to have the same num of elements as the atlas specified :  %d \n',length(handles.AtlasControl.Left)))
+    end
+    if length(handles.AtlasControl.Left)~=length(state{2})
+        error(sprintf('toggle state vector (for right) needs to have the same num of elements as the atlas specified :  %d \n',length(handles.AtlasControl.Left)))
+    end
+    
+    if isfield(handles.AtlasControl,'Left')
+        for i = 1:length(handles.AtlasControl.Left)
+            if state{1}(i)>0
+                handles.AtlasCheck.Left(i).Value = 1;
+                handles.AtlasPatch.Left(i).Visible = 'on';
+            else
+                handles.AtlasCheck.Left(i).Value = 0;
+                handles.AtlasPatch.Left(i).Visible = 'off';
+            end
+        end
+    end
+    if isfield(handles.AtlasControl,'Right')
+        for i = 1:length(handles.AtlasControl.Right)
+            if state{2}(i)>0
+                handles.AtlasCheck.Right(i).Value = 1;
+                handles.AtlasPatch.Right(i).Visible = 'on';
+            else
+                handles.AtlasCheck.Right(i).Value = 0;
+                handles.AtlasPatch.Right(i).Visible = 'off';
+            end
+        end
+    end
+elseif ~state
     if isfield(handles.AtlasControl,'Left')
         for i = 1:length(handles.AtlasControl.Left)
             handles.AtlasCheck.Left(i).Value = 0;
