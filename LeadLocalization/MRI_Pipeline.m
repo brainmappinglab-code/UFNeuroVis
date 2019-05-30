@@ -5,6 +5,7 @@ clear; clc; close all;
 UFNeuroVis_setEnv;
 
 %#ok<*NASGU>
+COREGISTER_METHOD = 1; % 1 - MATLAB
 
 %% Step 0: Setups
 Patient_DIR = uigetdir('','Please select the subject Folder');
@@ -78,6 +79,46 @@ else
 % 	preop_T1 = preop_T1_filtered;
 % 	fprintf('MRI Spatial Filter with Diffusion Filter complete.\n');
 %     MRIFILTERED=true;
+end
+
+%% Step 3: Coregister the Post-operative CT Scan to T1 MRI
+if ~isempty(dir([Processed_DIR,filesep,'rpostop_ct.nii']))
+    coregistered_CT = loadNifTi([Processed_DIR,filesep,'rpostop_ct.nii']);
+    disp('Loaded coregistered CT');
+    COREGISTERED=true;
+elseif isempty(dir([Processed_DIR,filesep,'postop_ct.nii']))
+    %if there is no postopCT, ask if user wants to do it just based on MRI
+    %This would be the case if we only have a postoperative MRI available
+    option1 = 'Use Postoperative MRI';
+    option2 = 'Cancel';
+    answer = questdlg('There is no postop_ct.nii, only an anat_t1.nii. What would you like to do?',...
+                      'Please Respond',...
+                      option1,option2,option2);
+    switch answer
+        case option1
+            coregistered_CT = preop_T1_acpc;
+        case option2
+            return;
+    end
+else
+    switch COREGISTER_METHOD
+        case 1
+            postop_CT = loadNifTi([Processed_DIR,filesep,'postop_ct.nii']);
+            [coregistered_CT, tform] = coregisterMRI(preop_T1, postop_CT);
+            save([Processed_DIR,filesep,'ct-t1_transformation.mat'],'tform');
+            save_nii(coregistered_CT,[Processed_DIR,filesep,'rpostop_ct.nii']);
+            COREGISTERED=true;
+        case 2
+            coregistrationANTs(NEURO_VIS_PATH,Processed_DIR,'linear');
+            coregistered_CT = loadNifTi([Processed_DIR,filesep,'rpostop_ct.nii']);
+            disp('Done with coregstration ANTs!');
+            COREGISTERED=true;
+        case 3
+            coregistrationANTs(NEURO_VIS_PATH,Processed_DIR,'nonlinear');
+            coregistered_CT = loadNifTi([Processed_DIR,filesep,'rpostop_ct.nii']);
+            disp('Done with coregstration ANTs!');
+            COREGISTERED=true;
+    end
 end
 
 %% Step 3: Transform the MRI Brain to AC-PC Coordinates
