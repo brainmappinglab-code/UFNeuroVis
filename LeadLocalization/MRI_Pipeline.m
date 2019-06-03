@@ -44,7 +44,7 @@ Processed_DIR = [Patient_DIR,filesep,'Processed'];
 if exist([Processed_DIR,filesep,'anat_t1.nii'],'file')
     disp('Nifti files detected. Skipping.')
 else
-    switch 1
+    switch 2
         case 1
             dcm2niftix(Patient_DIR, NifTi_DIR);
         case 2
@@ -121,6 +121,17 @@ else
     end
 end
 
+%% Step 5: Check coregistration
+% If the coregistration doesn't look good. Mark it and report to your
+% mentor. (This is highly unlikely event unless the brain is highly
+% shifted).
+
+% If coregistration is not good, see line 26 to 29 in "coregisterMRI"
+% function. Change max iteration to a larger number. 
+if COREGISTERED==true
+    checkCoregistration(preop_T1, coregistered_CT);
+end
+
 %% Step 3: Transform the MRI Brain to AC-PC Coordinates
 if ~isempty(dir([Processed_DIR,filesep,'anat_t1_acpc.nii'])) 
     
@@ -152,7 +163,11 @@ if ~isempty(dir([Processed_DIR,filesep,'anat_t1_acpc.nii']))
     end
 else
     [preop_T1_acpc, transformMatrix, coordinates] = transformACPC(preop_T1);
+    tform = affine3d(transformMatrix);
+    coregistered_CT_acpc = niftiWarp(coregistered_CT, tform);
     save_nii(preop_T1_acpc,[Processed_DIR,filesep,'anat_t1_acpc.nii']);
+    save_nii(coregistered_CT_acpc,[Processed_DIR,filesep,'rpostop_ct_acpc.nii']);
+    
     preop_T1_acpc = loadNifTi([Processed_DIR,filesep,'anat_t1_acpc.nii']);
     save([Processed_DIR,filesep,'acpc_transformation.mat'],'transformMatrix');
     save([Processed_DIR,filesep,'acpc_coordinates.mat'],'-struct','coordinates');
@@ -160,73 +175,9 @@ else
     TRANSFORMED=true;
 end
 
-%% Step 4: Coregister the Post-operative CT Scan to T1 MRI in AC-PC Coordinate
-if ~isempty(dir([Processed_DIR,filesep,'rpostop_ct.nii'])) && NEW_ACPC_COORDINATES==false && TRANSFORMED==true
-    coregistered_CT = loadNifTi([Processed_DIR,filesep,'rpostop_ct.nii']);
-    disp('Loaded coregistered CT');
-    COREGISTERED=true;
-elseif isempty(dir([Processed_DIR,filesep,'postop_ct.nii']))
-    %if there is no postopCT, ask if user wants to do it just based on MRI
-    %This would be the case if we only have a postoperative MRI available
-    option1 = 'Use Postoperative MRI';
-    option2 = 'Cancel';
-    answer = questdlg('There is no postop_ct.nii, only an anat_t1.nii. What would you like to do?',...
-                      'Please Respond',...
-                      option1,option2,option2);
-    switch answer
-        case option1
-            coregistered_CT = preop_T1_acpc;
-        case option2
-            return;
-    end
-elseif TRANSFORMED==true
-    switch 1
-        case 1
-            postop_CT = loadNifTi([Processed_DIR,filesep,'postop_ct.nii']);
-            [coregistered_CT, tform] = coregisterMRI(preop_T1_acpc, postop_CT);
-            save([Processed_DIR,filesep,'ct-t1_transformation.mat'],'tform');
-            save_nii(coregistered_CT,[Processed_DIR,filesep,'rpostop_ct.nii']);
-            COREGISTERED=true;
-        case 2
-            coregistrationANTs(NEURO_VIS_PATH,Processed_DIR,'linear');
-            coregistered_CT = loadNifTi([Processed_DIR,filesep,'rpostop_ct.nii']);
-            disp('Done with coregstration ANTs!');
-            COREGISTERED=true;
-        case 3
-            coregistrationANTs(NEURO_VIS_PATH,Processed_DIR,'nonlinear');
-            coregistered_CT = loadNifTi([Processed_DIR,filesep,'rpostop_ct.nii']);
-            disp('Done with coregstration ANTs!');
-            COREGISTERED=true;
-    end
-end
-
-%% Step 4.5: Repeat the same process for T2 MRI as well (Optional)
-if ~isempty(dir([Processed_DIR,filesep,'anat_t2_acpc.nii']))
-    preop_T2_acpc = loadNifTi([Processed_DIR,filesep,'anat_t2_acpc.nii']);
-else
-    preop_T2 = loadNifTi([Processed_DIR,filesep,'anat_t2.nii']);
-    [preop_T2_acpc, tform] = coregisterMRI(preop_T1_acpc, preop_T2);
-    save([Processed_DIR,filesep,'t2-t1_transformation.mat'],'tform');
-    save_nii(preop_T2_acpc,[Processed_DIR,filesep,'anat_t2_acpc.nii']);
-end
-
-% Data Check. t2-t1 transformation matrix should look identical (or at
-% least very very similar to acpc transformation matrix
-
-%% Step 5: Check coregistration
-% If the coregistration doesn't look good. Mark it and report to your
-% mentor. (This is highly unlikely event unless the brain is highly
-% shifted).
-
-% If coregistration is not good, see line 26 to 29 in "coregisterMRI"
-% function. Change max iteration to a larger number. 
-if COREGISTERED==true
-    checkCoregistration(preop_T1_acpc, coregistered_CT);
-end
-
 %% Step 6: Lead Localization
 if COREGISTERED==true
-    leadLocalization(preop_T1_acpc, coregistered_CT, Processed_DIR);
+    leadLocalization(preop_T1_acpc, coregistered_CT_acpc, Processed_DIR);
 end
 
 %% Step 7: Normalization based on patient morph
