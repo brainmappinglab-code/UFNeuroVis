@@ -1,4 +1,4 @@
-clc; close all; clear all;
+clc; close all; clear;
 
 %% set the environment
 UFNeuroVis_setEnv;
@@ -128,7 +128,7 @@ end
 %% Setup
 MetalLead = [0.7 0.7 0.7];
 InsulationColor = [0.2,0.2,0.2];
-PlotLead = false;
+PlotLead = true;
 
 
 % Get Subject Directory

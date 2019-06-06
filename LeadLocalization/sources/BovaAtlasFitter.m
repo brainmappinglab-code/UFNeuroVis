@@ -1101,6 +1101,10 @@ function saveAsButton_Callback(hObject, eventdata, handles)
     definput = {'myFit'};
     answer = inputdlg(prompt,title,[1 40],definput);
     
+    if isempty(answer)
+        return
+    end
+    
     name = fullfile([getappdata(handles.figure1,'ProcessedDir'),filesep,'BOVAFit_',answer{1},'.mat']);
     if exist(name,'file')
         M = load(name);

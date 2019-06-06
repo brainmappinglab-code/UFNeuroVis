@@ -1,6 +1,10 @@
 function leadLocalization( MRI, CT, leadFolder )
 %Lead Localization Software
 
+%#ok<*INUSD>
+%#ok<*INUSL>
+%#ok<*NASGU>
+
 % Setup Figure
 handles.gui = largeFigure(0, [1280 900]); clf(handles.gui);
 handles.sliceViews.Sagittal = axes(handles.gui, 'Units', 'Normalized', 'Position', [0 0.5 0.5 0.5], 'DataAspectRatio',[1 1 1]); cla(handles.sliceViews.Sagittal);
@@ -61,6 +65,8 @@ handles.leadlocalization.distal.showSelect = uicontrol('Style','text','Units','N
     'String','[   0,   0,   0]','BackgroundColor',[0 0 0],'ForegroundColor',[1 1 1]);
 handles.leadlocalization.proximal.showSelect = uicontrol('Style','text','Units','Normalized','Position',[0.7 0.25 0.08 0.03],...
     'String','[   0,   0,   0]','BackgroundColor',[0 0 0],'ForegroundColor',[1 1 1]);
+handles.leadlocalization.missingContacts = uicontrol('Style','PushButton','Units','Normalized','Position',[0.85 0.25 0.08 0.03],...
+    'String','Missing Contacts','Callback',{@missingContacts,'distal'});
 handles.leadlocalization.distal.view = uicontrol('Style','PushButton','Units','Normalized','Position',[0.6 0.15 0.08 0.03],...
     'String','View Distal','Callback',{@viewContact,'distal'});
 handles.leadlocalization.proximal.view = uicontrol('Style','PushButton','Units','Normalized','Position',[0.7 0.15 0.08 0.03],...
@@ -317,6 +323,12 @@ handles.leadlocalization.leadTypeSelect.Value = 1;
 handles.leadlocalization.leadSideSelect.Value = 1;
 handles.leadlocalization.distal.showSelect.String='[   0,   0,   0]';
 handles.leadlocalization.proximal.showSelect.String='[   0,   0,   0]';
+
+if isfield(handles,'interp')
+    close(handles.interp.gui);
+    handles=rmfield(handles,'interp');
+end
+
 guidata(hObject, handles);
 
 function savePoints(filename, Distal, Proximal, numContacts)
@@ -334,7 +346,12 @@ fclose(fid);
 
 function saveLead(hObject, eventdata)
 handles = guidata(hObject);
-Side = handles.leadlocalization.lead.side;
+
+if isfield(handles,'interp') % Dealing with missing contacts; need to interpolate distal or proximal
+    handles=findEndContacts(handles);
+end
+
+Side = handles.leadlocalization.lead.side; 
 Type = handles.leadlocalization.lead.type;
 nContacts = handles.leadlocalization.lead.nContacts;
 
@@ -412,7 +429,72 @@ handles = guidata(hObject);
 handles.leadlocalization.lead.side = hObject.String{hObject.Value};
 guidata(hObject, handles);
 
-function enterLeadContacts(hObject, eventdata)
+function enterLeadContacts(hObject, eventdata) 
 handles = guidata(hObject);
 handles.leadlocalization.lead.nContacts = str2double(hObject.String);
 guidata(hObject, handles);
+
+function missingContacts(hObject, eventdata, type)
+% Launches an external GUI that allows for interpolating missing contacts
+handles=guidata(hObject);
+nContacts=handles.leadlocalization.lead.nContacts;
+
+if ~isfield(handles,'interp')
+    handles.interp=interpolateMissingContacts(nContacts);
+elseif isempty(handles.interp)
+    handles.interp=interpolateMissingContacts(nContacts);    
+elseif ~ishandle(handles.interp.gui)
+    handles.interp=interpolateMissingContacts(nContacts);     
+else
+    return
+end
+
+for i=1:nContacts
+    handles.interp.node(i).button.Callback={@setContact, i, hObject};
+    handles.interp.node(i).view.Callback={@viewMissingContact, i, hObject};
+end
+
+handles.interp.gui.DeleteFcn={@deleteMissingContact, handles};
+
+guidata(hObject,handles);
+
+function setContact(hObject, eventdata, contactNumber, hObj)
+
+handles=guidata(hObj);
+
+handles.interp.node(contactNumber).pos=handles.MRI.centerDimensions;
+handles.interp.node(contactNumber).posStr.String=sprintf('[%3.2f,%3.2f,%3.2f]',...
+    handles.MRI.centerDimensions(1),handles.MRI.centerDimensions(2),...
+    handles.MRI.centerDimensions(3));
+
+guidata(hObj,handles);
+
+function deleteMissingContact(hObject, eventdata, handles)
+% handles=guidata(hObject);
+handles=rmfield(handles,'interp');
+guidata(hObject,handles);
+
+function viewMissingContact(hObject, eventdata, contactNum, hObj)
+
+handles = guidata(hObj);
+
+if ~isempty(handles.interp.node(contactNum).pos)
+    handles.MRI.centerDimensions = handles.interp.node(contactNum).pos;
+    handles.CT.centerDimensions = handles.interp.node(contactNum).pos;
+
+    updateSlices(handles);
+end
+
+function handles=findEndContacts(handles)
+% Using the lead locations given in handles.interp, find the location of distal/proximal
+% if they are not already set
+
+if all(handles.leadlocalization.lead.distal == 0)
+    disp('interpolate distal contact here')
+end
+
+if all(handles.leadlocalization.lead.proximal == 0)
+    disp('interpolate proximal contact here')
+end
+
+
