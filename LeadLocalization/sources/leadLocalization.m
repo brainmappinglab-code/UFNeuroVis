@@ -361,6 +361,11 @@ if nContacts==0
     nContacts = handles.leadlocalization.lead.nContacts; 
 end
 
+if strcmp(Side,'Choose Side')
+    disp('Need to choose a side before saving the lead');
+    return;
+end
+
 Distal = handles.leadlocalization.lead.distal;
 Proximal = handles.leadlocalization.lead.proximal;
 Notes = handles.leadlocalization.leadNotes.String;
@@ -490,11 +495,61 @@ function handles=findEndContacts(handles)
 % if they are not already set
 
 if all(handles.leadlocalization.lead.distal == 0)
-    disp('interpolate distal contact here')
+    indContact=0;
+    
+    for i=1:handles.leadlocalization.lead.nContacts
+        if ~isempty(handles.interp.node(i).pos)
+            indContact=[indContact,i]; %#ok<AGROW>
+        end
+    end
+    
+    indContact=indContact(2:end);
+    
+    if sum(indContact) == 1
+        disp('Need to have more than one contact chosen to interpolate');
+    end
+    
+    minContactKnown=min(indContact);
+
+    possibleCombs=nchoosek(indContact,2);
+    distalEstimate=nan(size(possibleCombs,1),3);
+    
+    for i=1:size(possibleCombs,1)
+        dirVec=(handles.interp.node(possibleCombs(i,1)).pos - handles.interp.node(possibleCombs(i,2)).pos) / abs(possibleCombs(i,1) - possibleCombs(i,2));
+
+        distalEstimate(i,:)=handles.interp.node(minContactKnown).pos + dirVec * (minContactKnown - 1);
+    end
+    
+    handles.leadlocalization.lead.distal=mean(distalEstimate,1);
 end
 
 if all(handles.leadlocalization.lead.proximal == 0)
-    disp('interpolate proximal contact here')
+    indContact=0;
+    
+    for i=1:handles.leadlocalization.lead.nContacts
+        if ~isempty(handles.interp.node(i).pos)
+            indContact=[indContact,i]; %#ok<AGROW>
+        end
+    end
+    
+    indContact=indContact(2:end);
+    
+    if sum(indContact) == 1
+        disp('Need to have more than one contact chosen to interpolate');
+    end
+    
+    maxContactKnown=max(indContact);
+
+    possibleCombs=nchoosek(indContact,2);
+    proximalEstimate=nan(size(possibleCombs,1),3);
+    
+    for i=1:size(possibleCombs,1)
+        dirVec=(handles.interp.node(possibleCombs(i,1)).pos - handles.interp.node(possibleCombs(i,2)).pos) / abs(possibleCombs(i,1) - possibleCombs(i,2));
+
+        proximalEstimate(i,:)=handles.interp.node(maxContactKnown).pos - dirVec * (handles.leadlocalization.lead.nContacts - maxContactKnown);
+    end
+    
+    handles.leadlocalization.lead.proximal=mean(proximalEstimate,1);
 end
 
 
