@@ -34,7 +34,7 @@ for i=1:numContacts
         'Units','Pixels','Position',[10 currPosition 40 nodeHeight],...
         'FontSize',fontSize,'BackgroundColor',[0.96 0.96 0.96]);
     handles.node(i).text.Enable='off';
-    handles.node(i).button=uicontrol(handles.gui,'Style','pushbutton','String','Set',...
+    handles.node(i).set=uicontrol(handles.gui,'Style','pushbutton','String','Set',...
         'Units','Pixels','Position',[60 currPosition 50 nodeHeight],...
         'FontSize',fontSize);
     handles.node(i).posStr=uicontrol(handles.gui,'Style','text','String','[    0,    0,    0]',...
@@ -43,7 +43,15 @@ for i=1:numContacts
     handles.node(i).view=uicontrol(handles.gui,'Style','pushbutton','String','View',...
         'Units','Pixels','Position',[260 currPosition 60 nodeHeight],...
         'FontSize',fontSize);
+    handles.node(i).pos=[];
     currPosition=currPosition+nodeHeight+distanceBetweenNodes;
 end
+
+handles.node(1).set.Enable='off';
+handles.node(1).view.Enable='off';
+handles.node(1).posStr.String='Distal';
+handles.node(numContacts).set.Enable='off';
+handles.node(numContacts).view.Enable='off';
+handles.node(numContacts).posStr.String='Proximal';
 
 end

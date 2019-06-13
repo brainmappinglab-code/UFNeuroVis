@@ -347,7 +347,7 @@ fclose(fid);
 function saveLead(hObject, eventdata)
 handles = guidata(hObject);
 
-if isfield(handles,'interp') % Dealing with missing contacts; need to interpolate distal or proximal
+if isfield(handles,'interp') % Dealing with missing contacts; need to extrapolate distal or proximal
     handles=findEndContacts(handles);
 end
 
@@ -364,10 +364,48 @@ end
 if strcmp(Side,'Choose Side')
     disp('Need to choose a side before saving the lead');
     return;
+elseif all(handles.leadlocalization.lead.distal == 0) || all(handles.leadlocalization.lead.proximal == 0)
+    disp('No distal and/or proximal contacts chosen');
+    return;
 end
 
 Distal = handles.leadlocalization.lead.distal;
 Proximal = handles.leadlocalization.lead.proximal;
+
+% If the estimated lead length from the contacts is greater than 0.5mm off from the
+% documented lead length, warn the user
+if abs(rssq(Distal - Proximal) - getLeadLength(Type)) >= 0.5
+    uiwait(msgbox({'Warning: Estimated length is greater than 0.5mm off from expected length',...
+        sprintf('Estimated length is %.2f, expected length is %.2f',rssq(Distal - Proximal),getLeadLength(Type)),...
+        'Check location of estimated contact locations','Check number of contacts'},...
+        'Length Differences','modal'));
+    
+    option1='Change length w/ proximal constant';
+    option2='Change length w/ distal constant';
+    option3='Change length w/out a constant contact';
+    
+    answer=questdlg({'Would you like to save the lead anyway? Choose an option below to attempt to correct the length',...
+        'Press ''X'' to cancel'},...
+        'Continue?',option1,option2,option3,option3);
+    
+    switch answer
+        case option1
+            handles=ChangeLength(handles,'p');  % proximal constant
+            
+        case option2
+            handles=ChangeLength(handles,'d');  % distal constant
+            
+        case option3
+            handles=ChangeLength(handles,'n');  % no constant
+            
+        otherwise
+            return;
+    end
+    
+    Distal = handles.leadlocalization.lead.distal;
+    Proximal = handles.leadlocalization.lead.proximal;
+end
+
 Notes = handles.leadlocalization.leadNotes.String;
 leadName = sprintf('%s_',handles.leadlocalization.lead.side);
 nLead = dir([handles.leadlocalization.leadFolder,filesep,'LEAD_',leadName,'*.mat']);
@@ -455,7 +493,7 @@ else
 end
 
 for i=1:nContacts
-    handles.interp.node(i).button.Callback={@setContact, i, hObject};
+    handles.interp.node(i).set.Callback={@setContact, i, hObject};
     handles.interp.node(i).view.Callback={@viewMissingContact, i, hObject};
 end
 
@@ -494,6 +532,8 @@ function handles=findEndContacts(handles)
 % Using the lead locations given in handles.interp, find the location of distal/proximal
 % if they are not already set
 
+method='mle';
+
 if all(handles.leadlocalization.lead.distal == 0)
     indContact=0;
     
@@ -506,21 +546,82 @@ if all(handles.leadlocalization.lead.distal == 0)
     indContact=indContact(2:end);
     
     if sum(indContact) == 1
-        disp('Need to have more than one contact chosen to interpolate');
+        disp('Need to have more than one contact chosen to extrapolate');
+        return;
     end
     
-    minContactKnown=min(indContact);
+    switch method
+        case 'bipolar'
+            minContactKnown=min(indContact);
 
-    possibleCombs=nchoosek(indContact,2);
-    distalEstimate=nan(size(possibleCombs,1),3);
-    
-    for i=1:size(possibleCombs,1)
-        dirVec=(handles.interp.node(possibleCombs(i,1)).pos - handles.interp.node(possibleCombs(i,2)).pos) / abs(possibleCombs(i,1) - possibleCombs(i,2));
+            possibleCombs=nchoosek(indContact,2);
+            distalEstimate=nan(size(possibleCombs,1),3);
 
-        distalEstimate(i,:)=handles.interp.node(minContactKnown).pos + dirVec * (minContactKnown - 1);
+            for i=1:size(possibleCombs,1)
+                dirVec=(handles.interp.node(possibleCombs(i,1)).pos - handles.interp.node(possibleCombs(i,2)).pos) / abs(possibleCombs(i,1) - possibleCombs(i,2));
+
+                distalEstimate(i,:)=handles.interp.node(minContactKnown).pos + dirVec * (minContactKnown - 1);
+            end
+
+            handles.leadlocalization.lead.distal=mean(distalEstimate,1);
+            
+        case 'mle'
+            len=length(indContact);
+            allPoints=zeros(len,3);
+            for i=1:len
+                allPoints(i,:)=handles.interp.node(indContact(i)).pos;
+            end
+            
+            r0=mean(allPoints);
+            d=bsxfun(@minus,allPoints,r0);
+            [~,~,V]=svd(d,0);
+            dirVec=V(:,1)';
+            t=(-40:0.01:40)';
+            newLine=r0+t.*dirVec;
+            
+            val=nan(len,1);
+            ind=nan(len,1);
+            
+            for i=1:len
+                d=allPoints(i,:)-newLine;
+                [val(i),ind(i)]=min(rssq(d,2));
+            end
+            
+            belowThreshold=val <= 0.25;
+            
+            if sum(belowThreshold) < 2
+                uiwait(msgbox('Warning: Not enough contacts are within threshold of the MLE line. Try some other method','ERROR','modal'));
+            else
+                newContacts=[];
+                newPos=nan(sum(belowThreshold),3);
+                count=1;
+                
+                for i=1:len
+                    if belowThreshold(i)
+                        newContacts=[newContacts,indContact(i)];  %#ok<AGROW>
+                        newPos(count,:)=newLine(ind(i),:);
+                        count=count+1;
+                    end
+                end
+                
+                minContactKnown=min(newContacts);
+                possibleCombs=nchoosek(1:length(newContacts),2);
+                distalEstimate=nan(size(possibleCombs,1),3);
+                
+                for i=1:size(possibleCombs,1)
+                    dirVec=(newPos(possibleCombs(i,1),:) - newPos(possibleCombs(i,2),:)) / ...
+                        abs(newContacts(possibleCombs(i,1)) - newContacts(possibleCombs(i,2)));
+                    
+                    distance=rssq(dirVec);
+                    dirVec=dirVec * (3.5 / distance);
+
+                    distalEstimate(i,:)=newPos(1,:) + dirVec * (minContactKnown - 1);
+                end
+
+                handles.leadlocalization.lead.distal=mean(distalEstimate,1);
+                
+            end
     end
-    
-    handles.leadlocalization.lead.distal=mean(distalEstimate,1);
 end
 
 if all(handles.leadlocalization.lead.proximal == 0)
@@ -538,18 +639,101 @@ if all(handles.leadlocalization.lead.proximal == 0)
         disp('Need to have more than one contact chosen to interpolate');
     end
     
-    maxContactKnown=max(indContact);
+    switch method
+        case 'bipolar'
+            maxContactKnown=max(indContact);
 
-    possibleCombs=nchoosek(indContact,2);
-    proximalEstimate=nan(size(possibleCombs,1),3);
-    
-    for i=1:size(possibleCombs,1)
-        dirVec=(handles.interp.node(possibleCombs(i,1)).pos - handles.interp.node(possibleCombs(i,2)).pos) / abs(possibleCombs(i,1) - possibleCombs(i,2));
+            possibleCombs=nchoosek(indContact,2);
+            proximalEstimate=nan(size(possibleCombs,1),3);
 
-        proximalEstimate(i,:)=handles.interp.node(maxContactKnown).pos - dirVec * (handles.leadlocalization.lead.nContacts - maxContactKnown);
+            for i=1:size(possibleCombs,1)
+                dirVec=(handles.interp.node(possibleCombs(i,1)).pos - handles.interp.node(possibleCombs(i,2)).pos) / abs(possibleCombs(i,1) - possibleCombs(i,2));
+
+                proximalEstimate(i,:)=handles.interp.node(maxContactKnown).pos - dirVec * (handles.leadlocalization.lead.nContacts - maxContactKnown);
+            end
+
+            handles.leadlocalization.lead.proximal=mean(proximalEstimate,1);
+            
+        case 'mle'
+            len=length(indContact);
+            allPoints=zeros(len,3);
+            for i=1:len
+                allPoints(i,:)=handles.interp.node(indContact(i)).pos;
+            end
+            
+            r0=mean(allPoints);
+            d=bsxfun(@minus,allPoints,r0);
+            [~,~,V]=svd(d,0);
+            dirVec=V(:,1)';
+            t=(-40:0.01:40)';
+            newLine=r0+t.*dirVec;
+            
+            val=nan(len,1);
+            ind=nan(len,1);
+            
+            for i=1:len
+                d=allPoints(i,:)-newLine;
+                [val(i),ind(i)]=min(rssq(d,2));
+            end
+            
+            belowThreshold=val <= 0.25;
+            
+            if sum(belowThreshold) < 2
+                uiwait(msgbox('Warning: Not enough contacts are within threshold of the MLE line. Try some other method','ERROR','modal'));
+            else
+                newContacts=[];
+                newPos=nan(sum(belowThreshold),3);
+                count=1;
+                
+                for i=1:len
+                    if belowThreshold(i)
+                        newContacts=[newContacts,indContact(i)];  %#ok<AGROW>
+                        newPos(count,:)=newLine(ind(i),:);
+                        count=count+1;
+                    end
+                end
+                
+                maxContactKnown=max(newContacts);
+                possibleCombs=nchoosek(1:length(newContacts),2);
+                proximalEstimate=nan(size(possibleCombs,1),3);
+                
+                for i=1:size(possibleCombs,1)
+                    dirVec=(newPos(possibleCombs(i,1),:) - newPos(possibleCombs(i,2),:)) / ...
+                        abs(newContacts(possibleCombs(i,1)) - newContacts(possibleCombs(i,2)));
+                    
+                    distance=rssq(dirVec);
+                    dirVec=dirVec * (3.5 / distance);
+
+                    proximalEstimate(i,:)=newPos(end,:) - dirVec * (handles.leadlocalization.lead.nContacts - maxContactKnown);
+                end
+
+                handles.leadlocalization.lead.proximal=mean(proximalEstimate,1);
+                
+            end
     end
-    
-    handles.leadlocalization.lead.proximal=mean(proximalEstimate,1);
 end
 
+function handles=ChangeLength(handles,const)
+% Change the length of the lead to match the expected lead length. 'const' refers to which
+% contact is constant (i.e. which one does not change)
+
+distal=handles.leadlocalization.lead.distal;
+proximal=handles.leadlocalization.lead.proximal;
+expectedLength=getLeadLength(handles.leadlocalization.lead.type);
+
+switch const
+    case 'p'
+        dirVec=proximal-distal;
+        handles.leadlocalization.lead.distal=proximal-dirVec*(expectedLength / rssq(dirVec));
+        
+    case 'd'
+        dirVec=distal-proximal;
+        handles.leadlocalization.lead.proximal=distal-dirVec*(expectedLength / rssq(dirVec));
+        
+    case 'n'
+        dirVec=proximal-distal;
+        lengthDiff=dirVec*(expectedLength / rssq(dirVec))-dirVec;
+        handles.leadlocalization.lead.distal=proximal-dirVec-lengthDiff/2;
+        handles.leadlocalization.lead.proximal=distal+dirVec+lengthDiff/2;
+end
 
