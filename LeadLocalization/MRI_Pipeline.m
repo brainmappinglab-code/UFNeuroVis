@@ -169,6 +169,7 @@ else
     save_nii(coregistered_CT_acpc,[Processed_DIR,filesep,'rpostop_ct_acpc.nii']);
     
     preop_T1_acpc = loadNifTi([Processed_DIR,filesep,'anat_t1_acpc.nii']);
+    coregistered_CT_acpc = loadNifTi([Processed_DIR,filesep,'rpostop_ct_acpc.nii']);
     save([Processed_DIR,filesep,'acpc_transformation.mat'],'transformMatrix');
     save([Processed_DIR,filesep,'acpc_coordinates.mat'],'-struct','coordinates');
     NEW_ACPC_COORDINATES=true;
