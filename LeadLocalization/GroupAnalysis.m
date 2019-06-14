@@ -3,25 +3,20 @@ clc; close all; clear all;
 
 %% set the environment
 UFNeuroVis_setEnv;
-
+PLOT_
 %teee
 %% Step 0: Setups
-root = 'C:\Users\eisinger\Documents\GoNoGo\CMTargeting\LeadLocations\';
-subjs = {'TS02','TS03','TS04_New','TS05','TS06'};%
+root = 'C:\Users\jcagle\Documents\VirtualMachine\Imaging';
+subjs = {'ET_CL_04'};%
 %subjs = {'TS06'};
-%% generate list of patient directories
-dirc = [];
-for i = 1:length(subjs)
-    dirc = [dirc; dir(fullfile(root,subjs{i}))];
-end
 
 %% get all the leads
 leads = [];
 leadCount = 0;
-for i=1:length(dirc)
+for i=1:length(subjs)
     
-    thisPatientFolder = [dirc(i).folder,filesep,dirc(i).name];
-    patient.Name = dirc(i).name;
+    thisPatientFolder = [root,filesep,subjs{i}];
+    patient.Name = subjs{i};
     
     thisPatientFolderProcessed = [thisPatientFolder,filesep,'Processed'];
     
@@ -30,11 +25,11 @@ for i=1:length(dirc)
     
     for j=1:length(leadsR)
         leadCount = leadCount + 1;
-        leads{leadCount} = load(fullfile(leadsR(j).folder,leadsR(j).name));
+        leads{leadCount} = load([thisPatientFolderProcessed,filesep,leadsR(j).name]);
     end
     for j=1:length(leadsL)
         leadCount = leadCount + 1;
-        leads{leadCount} = load(fullfile(leadsL(j).folder,leadsL(j).name));
+        leads{leadCount} = load([thisPatientFolderProcessed,filesep,leadsL(j).name]);
     end
   
     clear patient;
@@ -49,6 +44,10 @@ load([NEURO_VIS_PATH,filesep,'atlasModels',filesep,'UF Anatomical Models STL',fi
 h = largeFigure(100,[1280 900]); clf; set(h,'Color','k');
 set(h, 'Renderer', 'opengl');
 axHandles = gca;
+axis(axHandles,'off');
+axis(axHandles,'vis3d');
+view(axHandles,3);
+colormap(axHandles, 'gray');
 %handles = anatomical3DVisualizer(h, '');
 
 if isfield(AtlasInfo,'Left')
@@ -72,7 +71,7 @@ AtlasController(AtlasInfo, AtlasPatch);
 
 MetalLead = [0.7 0.7 0.7];
 InsulationColor = [1,0,0];
-PlotLead = false;
+PlotLead = true;
 
 if ~PlotLead
     MetalLead = InsulationColor;
