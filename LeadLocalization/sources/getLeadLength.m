@@ -25,8 +25,12 @@ switch leadType
         len=38.5;
     case 'UF_sEEG_14'
         len=45.5;
-    case 'UF_sEEG_16'
+    case {'UF_sEEG_16', 'UF_sEEG_16_093'}
         len=66.5;
+    case 'UF_sEEG_16_091'
+        len=52.5;
+    case 'UF_sEEG_16_111'
+        len=33;
     case 'medtronic_3387'
         len=9;
     case 'medtronic_3389'

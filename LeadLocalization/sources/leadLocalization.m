@@ -372,6 +372,10 @@ end
 Distal = handles.leadlocalization.lead.distal;
 Proximal = handles.leadlocalization.lead.proximal;
 
+if strcmp(Type,'UF_sEEG_16')
+    Type=checkLeadType(Distal,Proximal);
+end
+
 % If the estimated lead length from the contacts is greater than 0.5mm off from the
 % documented lead length, warn the user
 if abs(rssq(Distal - Proximal) - getLeadLength(Type)) >= 0.5
@@ -737,3 +741,23 @@ switch const
         handles.leadlocalization.lead.proximal=distal+dirVec+lengthDiff/2;
 end
 
+function Type=checkLeadType(Distal,Proximal)
+% If the general 16 contact lead type is chosen ('UF_sEEG_16'), check which length it is
+% closest to and change to the correct 16 contact model
+
+len=rssq(Distal-Proximal);
+
+expectedLengths=[getLeadLength('UF_sEEG_16_091'),getLeadLength('UF_sEEG_16_093'),getLeadLength('UF_sEEG_16_111')];
+
+[~,ind]=min(abs(len-expectedLengths));
+
+switch ind
+    case 1
+        Type='UF_sEEG_16_091';
+    case 2
+        Type='UF_sEEG_16_093';
+    case 3
+        Type='UF_sEEG_16_111';
+    otherwise
+        Type='UF_sEEG_16';
+end
