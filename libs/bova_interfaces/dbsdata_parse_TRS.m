@@ -2,6 +2,26 @@ function [ TRS_table ] = dbsdata_parse_TRS( trsdata1 )
 %[ TRS_table ] = dbsdata_parse_TRS( trsdata1 )
 %   parse data as stored by DBSdata program from Bova Lab
 
+%clean up trsdata1
+% BOVA (Atchar) saves the values as
+%   0 if you never touched it, just initialized
+trsdata1(trsdata1==0)=nan;
+%   1 if you selected empty
+trsdata1(trsdata1==1)=nan;
+%   2 if it is TRS 0
+trsdata1(trsdata1==2)=0;
+%   3 if it is TRS 0
+trsdata1(trsdata1==3)=1;
+%   4 if it is TRS 0
+trsdata1(trsdata1==4)=2;
+%   5 if it is TRS 0
+trsdata1(trsdata1==5)=3;
+%   6 if it is TRS 0
+trsdata1(trsdata1==6)=4;
+
+
+
+
 TRS_struct= struct( ...
  'intQ1', trsdata1(2,1),... %face tremor
  'intQ2rest', trsdata1(7,2),... % tongue tremor
