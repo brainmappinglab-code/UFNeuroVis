@@ -99,16 +99,15 @@ handles.transformButton.revert = uicontrol('Style','PushButton','Units','Normali
 if nargin==2
     handles.transformPosition = load(acpc_coordinates);
 else
-    handles.transformPosition.AC = handles.MRI.centerDimensions;
-    handles.transformPosition.PC = handles.MRI.centerDimensions;
-    handles.transformPosition.MC = handles.MRI.centerDimensions;
+    handles.transformPosition.AC = [0 0 0];
+    handles.transformPosition.PC = [0 0 0];
+    handles.transformPosition.MC = [0 0 0];
     handles.transformPosition.ACPC_AC = NaN; %the coordinates after AC PC transform
     handles.transformPosition.ACPC_PC = NaN;
     handles.transformPosition.ACPC_MC = NaN;
 end
 
 handles.alreadyTransformed = false;
-
 
 set(handles.gui, 'CloseRequestFcn', @closeRequestFcn);
 guidata(handles.gui, handles);
@@ -221,9 +220,15 @@ updateSlices(handles);
 
 function mriTransformation(hObject, eventdata)
 
-disp('Transformation Started, Please wait...');
-
 handles = guidata(hObject);
+
+if all(handles.transformPosition.AC==0) || all(handles.transformPosition.PC==0) || ...
+    all(handles.transformPosition.MC==0)
+    disp('One of the positions is not set. Please set all positions and try again');
+    return
+end
+
+disp('Transformation Started, Please wait...');
 
 handles.alreadyTransformed = true;
 

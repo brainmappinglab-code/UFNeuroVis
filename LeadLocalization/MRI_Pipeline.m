@@ -44,7 +44,7 @@ Processed_DIR = [Patient_DIR,filesep,'Processed'];
 if exist([Processed_DIR,filesep,'anat_t1.nii'],'file')
     disp('Nifti files detected. Skipping.')
 else
-    switch 2
+    switch 1
         case 1
             dcm2niftix(Patient_DIR, NifTi_DIR);
         case 2
@@ -121,7 +121,7 @@ else
     end
 end
 
-%% Step 5: Check coregistration
+%% Step 4: Check coregistration
 % If the coregistration doesn't look good. Mark it and report to your
 % mentor. (This is highly unlikely event unless the brain is highly
 % shifted).
@@ -132,7 +132,7 @@ if COREGISTERED==true
     checkCoregistration(preop_T1, coregistered_CT);
 end
 
-%% Step 3: Transform the MRI Brain to AC-PC Coordinates
+%% Step 5: Transform the MRI Brain to AC-PC Coordinates
 if ~isempty(dir([Processed_DIR,filesep,'anat_t1_acpc.nii'])) 
     
     %if an AC-PC already exists, see what the user wants to do, either redo
@@ -155,6 +155,7 @@ if ~isempty(dir([Processed_DIR,filesep,'anat_t1_acpc.nii']))
         case option2
             clear preop_T1_upsampled preop_T1;
             preop_T1_acpc = loadNifTi([Processed_DIR,filesep,'anat_t1_acpc.nii']);
+            coregistered_CT_acpc = loadNifTi([Processed_DIR,filesep,'rpostop_ct_acpc.nii']);
             disp('Loaded AC-PC transformed T1.');
             NEW_ACPC_COORDINATES=false;
             TRANSFORMED=true;
