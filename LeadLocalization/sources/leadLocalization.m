@@ -34,6 +34,7 @@ axis(handles.sliceViews.Axial, 'off');
 % Slice View Setup
 handles.MRI.sliceIndex = round(handles.MRI.dimension/2);
 handles.CT.sliceIndex = round(handles.CT.dimension/2);
+handles.viewMRI = true;
 
 % Colormap Setup
 handles.colormapResolution = 2048;
@@ -65,8 +66,10 @@ handles.leadlocalization.distal.showSelect = uicontrol('Style','text','Units','N
     'String','[   0,   0,   0]','BackgroundColor',[0 0 0],'ForegroundColor',[1 1 1]);
 handles.leadlocalization.proximal.showSelect = uicontrol('Style','text','Units','Normalized','Position',[0.7 0.25 0.08 0.03],...
     'String','[   0,   0,   0]','BackgroundColor',[0 0 0],'ForegroundColor',[1 1 1]);
-handles.leadlocalization.missingContacts = uicontrol('Style','PushButton','Units','Normalized','Position',[0.85 0.25 0.08 0.03],...
+handles.leadlocalization.missingContacts = uicontrol('Style','PushButton','Units','Normalized','Position',[0.80 0.25 0.08 0.03],...
     'String','Missing Contacts','Callback',{@missingContacts,'distal'});
+handles.leadlocalization.viewMRIButton = uicontrol('Style','PushButton','Units','Normalized','Position',[0.9 0.25 0.08 0.03],...
+    'String','View MRI','Callback',@viewMRIChange);
 handles.leadlocalization.distal.view = uicontrol('Style','PushButton','Units','Normalized','Position',[0.6 0.15 0.08 0.03],...
     'String','View Distal','Callback',{@viewContact,'distal'});
 handles.leadlocalization.proximal.view = uicontrol('Style','PushButton','Units','Normalized','Position',[0.7 0.15 0.08 0.03],...
@@ -96,6 +99,11 @@ Reset(handles.leadlocalization.reset,[]);
 handles=guidata(handles.gui);
 
 viewSlices(handles);
+
+function viewMRIChange(hObject, eventdata)
+handles = guidata(hObject);
+handles.viewMRI = ~handles.viewMRI;
+guidata(hObject, handles);
 
 function viewSlices(handles)
 referenceSlice = squeeze(handles.MRI.img(handles.MRI.sliceIndex(1),:,:))';
@@ -138,9 +146,15 @@ handles.MRI.sliceIndex(1) = min(max(1, handles.MRI.sliceIndex(1)),handles.MRI.di
 handles.MRI.sliceIndex(2) = min(max(1, handles.MRI.sliceIndex(2)),handles.MRI.dimension(2));
 handles.MRI.sliceIndex(3) = min(max(1, handles.MRI.sliceIndex(3)),handles.MRI.dimension(3));
 
-handles.referenceImage(1).CData = squeeze(handles.MRI.img(handles.MRI.sliceIndex(1),:,:))' * handles.colormapResolution;
-handles.referenceImage(2).CData = squeeze(handles.MRI.img(:,handles.MRI.sliceIndex(2),:))' * handles.colormapResolution;
-handles.referenceImage(3).CData = squeeze(handles.MRI.img(:,:,handles.MRI.sliceIndex(3)))' * handles.colormapResolution;
+if handles.viewMRI
+    handles.referenceImage(1).CData = squeeze(handles.MRI.img(handles.MRI.sliceIndex(1),:,:))' * handles.colormapResolution;
+    handles.referenceImage(2).CData = squeeze(handles.MRI.img(:,handles.MRI.sliceIndex(2),:))' * handles.colormapResolution;
+    handles.referenceImage(3).CData = squeeze(handles.MRI.img(:,:,handles.MRI.sliceIndex(3)))' * handles.colormapResolution;
+else
+    handles.referenceImage(1).CData = zeros(size(handles.referenceImage(1).CData));
+    handles.referenceImage(2).CData = zeros(size(handles.referenceImage(2).CData));
+    handles.referenceImage(3).CData = zeros(size(handles.referenceImage(3).CData));
+end
 
 handles.registeredImage(1).CData = squeeze(handles.CT.img(handles.MRI.sliceIndex(1),:,:))' * handles.colormapResolution + 1 + handles.colormapResolution;
 handles.registeredImage(1).AlphaData = squeeze(handles.CT.img(handles.MRI.sliceIndex(1),:,:))';
