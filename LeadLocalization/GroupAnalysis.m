@@ -1,13 +1,49 @@
 %group analysis
-clc; close all; clear all;
+clc; close all; clear;
+
+%#ok<*SAGROW>
 
 %% set the environment
+
 UFNeuroVis_setEnv;
-PLOT_
-%teee
+
 %% Step 0: Setups
-root = 'C:\Users\jcagle\Documents\VirtualMachine\Imaging';
-subjs = {'ET_CL_04'};%
+
+root = uigetdir('','Choose the root path of all images');
+
+if root == 0
+    return
+end
+
+possibleFolders = dir(root);
+possibleFolders([1,2]) = [];
+
+isDir = false(length(possibleFolders),1);
+folderNames = cell(length(possibleFolders),1);
+
+for i = 1:length(possibleFolders)
+    isDir(i) = possibleFolders(i).isdir;
+    folderNames{i} = possibleFolders(i).name;
+end
+
+possibleFolders(~isDir) = [];
+folderNames(~isDir) = [];
+
+[foldersToUse,OK] = listdlg('ListString',folderNames,'PromptString','Select subject folders',...
+    'SelectionMode','multiple','ListSize',[300 400]);
+
+if OK == 0
+    return
+end
+
+subjs = cell(length(foldersToUse),1);
+
+for i=1:length(foldersToUse)
+    subjs{i}=folderNames{foldersToUse(i)};
+end
+
+% root = 'C:\Users\jcagle\Documents\VirtualMachine\Imaging';
+% subjs = {'ET_CL_04'};%
 %subjs = {'TS06'};
 
 %% get all the leads
@@ -16,7 +52,7 @@ leadCount = 0;
 for i=1:length(subjs)
     
     thisPatientFolder = [root,filesep,subjs{i}];
-    patient.Name = subjs{i};
+%     patient.Name = subjs{i};
     
     thisPatientFolderProcessed = [thisPatientFolder,filesep,'Processed'];
     
@@ -25,7 +61,7 @@ for i=1:length(subjs)
     
     for j=1:length(leadsR)
         leadCount = leadCount + 1;
-        leads{leadCount} = load([thisPatientFolderProcessed,filesep,leadsR(j).name]);
+        leads{leadCount} = load([thisPatientFolderProcessed,filesep,leadsR(j).name]); 
     end
     for j=1:length(leadsL)
         leadCount = leadCount + 1;

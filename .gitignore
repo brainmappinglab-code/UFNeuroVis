@@ -21,3 +21,4 @@ __pycache__/
 
 # C extensions
 *.so
+*.xlsx

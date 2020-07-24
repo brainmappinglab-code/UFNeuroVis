@@ -186,7 +186,7 @@ if isfield(AtlasInfo,'Left')
     % Add to View Area
     AtlasInfo.LeftCMAP = hsv(length(AtlasSTL.Left));
     for n = 1:length(AtlasSTL.Left)
-        AtlasSTL.Left(n) = reducepatch(AtlasSTL.Left(n), 200);
+%         AtlasSTL.Left(n) = reducepatch(AtlasSTL.Left(n), 200);
         AtlasPatch.Left(n) = patch(AtlasSTL.Left(n), 'FaceColor', AtlasInfo.LeftCMAP(n,:), 'EdgeColor', 'None', 'FaceAlpha', 0.5, 'FaceLighting','phong');
     end
 end
@@ -194,7 +194,7 @@ end
 if isfield(AtlasInfo,'Right')
     AtlasInfo.RightCMAP = hsv(length(AtlasSTL.Right));
     for n = 1:length(AtlasSTL.Right)
-        AtlasSTL.Right(n) = reducepatch(AtlasSTL.Right(n), 200);
+%         AtlasSTL.Right(n) = reducepatch(AtlasSTL.Right(n), 200);
         AtlasPatch.Right(n) = patch(AtlasSTL.Right(n), 'FaceColor', AtlasInfo.RightCMAP(n,:), 'EdgeColor', 'None', 'FaceAlpha', 0.5, 'FaceLighting','phong');
     end
 end
