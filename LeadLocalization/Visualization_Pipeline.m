@@ -125,9 +125,9 @@ else
     disp(['Loaded BOVAFit: ',ToUse.name]);
 end
 
-%% Setup
+ %% Setup
 MetalLead = [0.7 0.7 0.7];
-InsulationColor = [0.2,0.2,0.2];
+InsulationColor = [0.0,0.0,0.0];
 PlotLead = true;
 
 
@@ -178,7 +178,8 @@ load([Processed_DIR,filesep,atlasName,'_STL_',BOVATransformationName,'.mat'],'At
 disp('Done loading and transforming atlas');
 %% Visualization
 % Setup Figure
-h = largeFigure(100,[1280 900]); clf; set(h,'Color','k');
+h = largeFigure(100,[1280 900]); clf; set(h,'Color','w');
+%handles = gca;
 handles = anatomical3DVisualizer(h, preop_T1_acpc);
 
 if isfield(AtlasInfo,'Left')
@@ -236,6 +237,7 @@ for n = 1:length(rightLeads)
         end
     end
 end
+camlight head
 
 %% OPTIONAL STEP TO VIEW PLANNED LEAD
 % NOT USUALLY USED
