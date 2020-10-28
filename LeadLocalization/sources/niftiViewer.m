@@ -72,8 +72,8 @@ set(handles.figure1,'Position',[monitorP Size(3:4)]);
 
 
 % Display all NifTi files in the folder
-handles.patientDir = varargin{1};
-handles.targetDir = varargin{2};
+handles.patientDir = varargin{2};
+handles.targetDir = varargin{3};
 if isempty(dir([handles.targetDir]))
     mkdir(handles.targetDir);
 end
