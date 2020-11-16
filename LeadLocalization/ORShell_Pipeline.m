@@ -42,50 +42,54 @@ if exist('mr2','file') && ~exist([Processed_DIR,filesep,'anat_t2.nii'],'file')
 	save_nii(preop_T2,[Processed_DIR,filesep,'anat_t2.nii']);
 end
 
-%% Step 2: Upsampling MRI and Potential Image Processing (Optional for now)
-if ~isempty(dir([Processed_DIR,filesep,'anat_t1_filtered.nii']))
-	preop_T1 = loadNifTi([Processed_DIR,filesep,'anat_t1_filtered.nii']);
-else
-	% Up Sample to Images with 0.5mm Resolution
-    preop_T1 = loadNifTi([Processed_DIR,filesep,'anat_t1.nii']);
-	preop_T1_upsampled = resampleNifTi(preop_T1, [0.5 0.5 1]);
-	fprintf('MRI Upsampling to 0.5mm spacing complete.\n');
-	
-	% Spatial Filtering
-	preop_T1_filtered = spatialFilter(preop_T1_upsampled, 'diffusion');
-	save_nii(preop_T1_filtered,[Processed_DIR,filesep,'anat_t1_filtered.nii']);
-	preop_T1 = preop_T1_filtered;
-	fprintf('MRI Spatial Filter with Diffusion Filter complete.\n');
+%% Load the CRW AC/PC Transformation
+fid = fopen('left vim hpd.crw','r');
+line = fgets(fid);
+while line > 0 
+    if strfind(line,'AC Point') > 0
+        Valid = fgets(fid);
+        AP = sscanf(fgets(fid),'%s = %f');
+        LT = sscanf(fgets(fid),'%s = %f');
+        AX = sscanf(fgets(fid),'%s = %f');
+        AC = [LT(3), AP(3), AX(3)];
+    end
+    if strfind(line,'PC Point') > 0
+        Valid = fgets(fid);
+        AP = sscanf(fgets(fid),'%s = %f');
+        LT = sscanf(fgets(fid),'%s = %f');
+        AX = sscanf(fgets(fid),'%s = %f');
+        PC = [LT(3), AP(3), AX(3)];
+    end
+    if strfind(line,'Ctrln Point') > 0
+        Valid = fgets(fid);
+        AP = sscanf(fgets(fid),'%s = %f');
+        LT = sscanf(fgets(fid),'%s = %f');
+        AX = sscanf(fgets(fid),'%s = %f');
+        MC = [LT(3), AP(3), AX(3)];
+    end
+    line = fgets(fid);
 end
+fclose(fid);
+
+Origin = (AC + PC) / 2;
+temp = (MC - Origin) / rssq(MC - Origin);
+J = (AC - PC) / rssq(AC - PC);
+I = cross(J,temp)/rssq(cross(J,temp));
+K = cross(I,J)/rssq(cross(I,J));
+
+Old = [Origin+I,1; Origin+J,1; Origin+K,1; Origin,1];
+New = [1,0,0,1; 0,1,0,1; 0,0,1,1; 0,0,0,1];
+
+T = Old\New;
+T(:,4) = round(T(:,4));
+tform = affine3d(T);
 
 %% Step 3: Transform the MRI Brain to AC-PC Coordinates
-if ~isempty(dir([Processed_DIR,filesep,'anat_t1_acpc.nii'])) 
-    
-    %if an AC-PC already exists, see what the user wants to do, either redo
-    %it or just use the current one
-    option1 = 'Edit AC-PC coordinates';
-    option2 = 'Use existing AC-PC transform';
-    option3 = 'Cancel';
-    answer = questdlg('An AC-PC transformed brain for this patient already exists. What would you like to do?',...
-                      'Please Respond',...
-                      option1,option2,option3,option3);
-    switch answer
-        case option1
-            [preop_T1_acpc, transformMatrix, coordinates] = transformACPC(preop_T1);
-            save_nii(preop_T1_acpc,[Processed_DIR,filesep,'anat_t1_acpc.nii']);
-            preop_T1_acpc = loadNifTi([Processed_DIR,filesep,'anat_t1_acpc.nii']);
-            save([Processed_DIR,filesep,'acpc_transformation.mat'],'transformMatrix');
-        case option2
-            clear preop_T1_upsampled preop_T1;
-            preop_T1_acpc = loadNifTi([Processed_DIR,filesep,'anat_t1_acpc.nii']);
-        case option3
-            return;
-    end
-else
-    [preop_T1_acpc, transformMatrix] = transformACPC(preop_T1);
-    save_nii(preop_T1_acpc,[Processed_DIR,filesep,'anat_t1_acpc.nii']);
+if ~isempty(dir([Processed_DIR,filesep,'rpostop_ct.nii']))
     preop_T1_acpc = loadNifTi([Processed_DIR,filesep,'anat_t1_acpc.nii']);
-    save([Processed_DIR,filesep,'acpc_transformation.mat'],'transformMatrix');
+else
+    preop_T1_acpc = niftiWarp(preop_T1, tform);
+    save_nii(preop_T1_acpc,[Processed_DIR,filesep,'anat_t1_acpc.nii']);
 end
 
 %% Step 4: Coregister the Post-operative CT Scan to T1 MRI in AC-PC Coordinate
@@ -95,7 +99,7 @@ else
     postop_CT = loadNifTi([Processed_DIR,filesep,'postop_ct.nii']);
     [coregistered_CT, tform] = coregisterMRI(preop_T1_acpc, postop_CT);
     save([Processed_DIR,filesep,'ct-t1_transformation.mat'],'tform');
-    save_nii(coregistered_CT,[Processed_DIR,filesep,'rpostop_ct.nii']);
+    save_nii(coregistered_CT,[Processed_DIR,filesep,'rpostop_ct_matlab.nii']);
 end
 
 %% Step 5: Check coregistration.
@@ -155,26 +159,3 @@ if ~isempty(bovaFits)
         end
     end
 end
-
-
-
-
-%% EXTRA 1: Use UF Transform Matrix during OR Planning
-
-preop_T1 = loadNifTi([Processed_DIR,filesep,'anat_t1.nii']);
-preop_T2 = loadNifTi([[Processed_DIR,filesep,'anat_t2.nii']]);
-T = readFuseMatrix('mr.xfrm');
-T = inv(T);
-T(:,4) = round(T(:,4));
-tform = affine3d(T);
-preop_T1_planning = niftiWarp(preop_T1, tform);
-
-T = readFuseMatrix('mr2.xfrm');
-T = inv(T);
-T(:,4) = round(T(:,4));
-tform = affine3d(T);
-preop_T2_planning = niftiWarp(preop_T2, tform);
-
-save_nii(preop_T1_planning,[Processed_DIR,filesep,'ranat_t1_planning.nii']);
-save_nii(preop_T2_planning,[Processed_DIR,filesep,'ranat_t2_planning.nii']);
-checkCoregistration(preop_T1_planning, preop_T2_planning);

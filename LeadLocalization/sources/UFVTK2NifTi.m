@@ -17,10 +17,22 @@ if length(Data) ~= info.xdim*info.ydim*info.zdim
     error('Incorrect Datasize. Is this the same Image Header for the given Image file?');
 end
 
-img = reshape(Data, [info.xdim, info.ydim, info.zdim]);
+img = reshape(Data, [info.xdim, info.ydim, info.zdim]) - min(Data);
 CenterIndex = [abs(info.pixorg(1))/info.pdim(1) + 1, abs(info.pixorg(2))/info.pdim(2) + 1, abs(info.pixorg(3))/info.pdim(3) + 1];
 NifTi = make_nii(img, info.pdim, CenterIndex, 4);
 NifTi = loadNifTi(NifTi,'reformat');
+
+reference = [0, 1, 0, 0;
+    1, 0, 0, 0;
+    0, 0, 1, 0;
+    0, 0, 0, 1;];
+
+xtrm = [info.xfrm([2:4,1],:), [0;0;0;1]];
+newXtrm = xtrm(:,[2,1,3,4]);
+T = newXtrm\reference;
+T(:,4) = round(T(:,4));
+tform = affine3d(T);
+NifTi = niftiWarp(NifTi, tform);
 
 function info = initHeader(rawdata)
 info.magic = char(rawdata(1:4));
