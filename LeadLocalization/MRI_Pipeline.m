@@ -56,10 +56,12 @@ else
             disp('Try to coregister before doing AC-PC, then apply AC-PC transform to CT scan.');
         case 5
             disp('Do it in Slicer 4.8 Please');
+        case 6
+            dcm2niix_matlab(Patient_DIR,NifTi_DIR); % Same as dcm2niftix, except updated to the most recent release as of 2020_10_28
     end
     
     % Step 1.5: Move the files to processed folder
-    niftiViewer(NifTi_DIR, Processed_DIR);
+    niftiViewer([],NifTi_DIR, Processed_DIR);
 end
 
 %% Step 2: Upsampling MRI and Potential Image Processing (Optional for now)
