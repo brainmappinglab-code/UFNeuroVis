@@ -26,9 +26,11 @@ CTFILTERED = false;
 TRANSFORMED = false;
 COREGISTERED = false;
 NEW_ACPC_COORDINATES=false;
+USING_CLINICAL_IMAGES = false;
 
 NifTi_DIR = [Patient_DIR,filesep,'NiiX'];
 Processed_DIR = [Patient_DIR,filesep,'Processed'];
+DBSArch_DIR = fullfile(Patient_DIR,'DBSArch');
 [~,~]=mkdir(NifTi_DIR);
 [~,~]=mkdir(Processed_DIR);
 
@@ -42,9 +44,22 @@ Processed_DIR = [Patient_DIR,filesep,'Processed'];
 % it will divide DICOM files in their respective folders. Then 
 
 if exist([Processed_DIR,filesep,'anat_t1.nii'],'file')
-    disp('Nifti files detected. Skipping.')
+    disp('Nifti files detected. Skipping.');
+    preop_T1 = loadNifTi([Processed_DIR,filesep,'anat_t1.nii']);
+elseif exist(DBSArch_DIR,'dir') ~= 0 && (exist(fullfile(DBSArch_DIR,'mr'),'file') ~= 0 || exist(fullfile(DBSArch_DIR,'ct.postop'),'file') ~= 0)
+    USING_CLINICAL_IMAGES = true;
+    
+    if exist(fullfile(DBSArch_DIR,'mr'),'file') ~= 0
+        preop_T1 = UFVTK2NifTi(fullfile(DBSArch_DIR,'mr'));
+        save_nii(preop_T1,[Processed_DIR,filesep,'anat_t1.nii']);
+    end
+    
+    if exist(fullfile(DBSArch_DIR,'ct.postop'),'file') ~= 0
+        postop_ct = UFVTK2NifTi(fullfile(DBSArch_DIR,'ct.postop'));
+        save_nii(postop_ct,[Processed_DIR,filesep,'postop_ct.nii']);
+    end
 else
-    switch 1
+    switch 6
         case 1
             dcm2niftix(Patient_DIR, NifTi_DIR);
         case 2
@@ -65,23 +80,23 @@ else
 end
 
 %% Step 2: Upsampling MRI and Potential Image Processing (Optional for now)
-if ~isempty(dir([Processed_DIR,filesep,'anat_t1_filtered.nii']))
-	preop_T1 = loadNifTi([Processed_DIR,filesep,'anat_t1_filtered.nii']);
-    disp('MRI already upsampled and loaded.');
-    MRIFILTERED=true;
-else
-	% Up Sample to Images with 0.5mm Resolution
-    preop_T1 = loadNifTi([Processed_DIR,filesep,'anat_t1.nii']);
-	preop_T1_upsampled = resampleNifTi(preop_T1, [0.5 0.5 1]);
-	fprintf('MRI Upsampling to 0.5mm spacing complete.\n');
-	
-	% Spatial Filtering
-% 	preop_T1_filtered = spatialFilter(preop_T1_upsampled, 'diffusion');
-% 	save_nii(preop_T1_filtered,[Processed_DIR,filesep,'anat_t1_filtered.nii']);
-% 	preop_T1 = preop_T1_filtered;
-% 	fprintf('MRI Spatial Filter with Diffusion Filter complete.\n');
+% if ~isempty(dir([Processed_DIR,filesep,'anat_t1_filtered.nii']))
+% 	preop_T1 = loadNifTi([Processed_DIR,filesep,'anat_t1_filtered.nii']);
+%     disp('MRI already upsampled and loaded.');
 %     MRIFILTERED=true;
-end
+% else
+% 	% Up Sample to Images with 0.5mm Resolution
+%     preop_T1 = loadNifTi([Processed_DIR,filesep,'anat_t1.nii']);
+% 	preop_T1_upsampled = resampleNifTi(preop_T1, [0.5 0.5 1]);
+% 	fprintf('MRI Upsampling to 0.5mm spacing complete.\n');
+% 	
+% 	% Spatial Filtering
+% % 	preop_T1_filtered = spatialFilter(preop_T1_upsampled, 'diffusion');
+% % 	save_nii(preop_T1_filtered,[Processed_DIR,filesep,'anat_t1_filtered.nii']);
+% % 	preop_T1 = preop_T1_filtered;
+% % 	fprintf('MRI Spatial Filter with Diffusion Filter complete.\n');
+% %     MRIFILTERED=true;
+% end
 
 %% Step 3: Coregister the Post-operative CT Scan to T1 MRI
 if ~isempty(dir([Processed_DIR,filesep,'rpostop_ct.nii']))
@@ -164,6 +179,33 @@ if ~isempty(dir([Processed_DIR,filesep,'anat_t1_acpc.nii']))
         case option3
             return;
     end
+elseif USING_CLINICAL_IMAGES
+    file_crw = dir(fullfile(DBSArch_DIR,'*VIM*'));
+    
+    if length(file_crw) == 1
+        tform = LoadDBSArchACPC(fullfile(file_crw.folder,file_crw.name));
+    else
+        for i=1:length(file_crw)
+            fprintf('%d: %s\n',i,file_crw(i).name);
+        end
+        
+        answer=input('Multiple VIM CRW files discovered; choose one: ','s');
+        
+        val=str2double(answer);
+        
+        if val > 0 && val < length(file_crw)
+            tform = LoadDBSArchACPC(fullfile(file_crw(val).folder,file_crw(val).name));
+        end
+    end
+    
+    preop_T1_acpc = niftiWarp(preop_T1, tform);
+    save_nii(preop_T1_acpc,[Processed_DIR,filesep,'anat_t1_acpc.nii']);
+    
+    coregistered_CT_acpc = niftiWarp(coregistered_CT, tform);
+    save_nii(coregistered_CT_acpc,[Processed_DIR,filesep,'rpostop_ct_acpc.nii']);
+    
+    NEW_ACPC_COORDINATES=true;
+    TRANSFORMED=true;
 else
     [preop_T1_acpc, transformMatrix, coordinates] = transformACPC(preop_T1);
     tform = affine3d(transformMatrix);
