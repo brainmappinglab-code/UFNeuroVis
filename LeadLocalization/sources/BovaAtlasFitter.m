@@ -840,7 +840,10 @@ function selectExistingTransformationButton_Callback(hObject, eventdata, handles
     %that function calls TransformAtlas which will then negate the
     %appropriate values if we are on the right side of the brain
     
-    out = uigetdir('\\gunduz-lab.bme.ufl.edu\Data\DBSArch\','Select Patient Folder');    
+%     out = uigetdir('\\gunduz-lab.bme.ufl.edu\Data\DBSArch\','Select Patient Folder');    
+    tmp_proc_dir = getappdata(handles.figure1,'ProcessedDir');
+    pat_dir = fileparts(tmp_proc_dir);
+    out = uigetdir(pat_dir,'Select Patient DBSArch Folder');    
     tr = fullfile(out,'fmrisavedata.mat');
     if exist(tr,'file')
        M = load(tr); 
@@ -1030,7 +1033,10 @@ updatePlots(handles);
 % --- Executes on button press in addPlannedLeadButton.
 function addPlannedLeadButton_Callback(hObject, eventdata, handles)
     
-    [name,path] = uigetfile('\\gunduz-lab.bme.ufl.edu\Data\DBSArch\*.crw','Select CRW file');
+%     [name,path] = uigetfile('\\gunduz-lab.bme.ufl.edu\Data\DBSArch\*.crw','Select CRW file');
+    tmp_proc_dir = getappdata(handles.figure1,'ProcessedDir');
+    pat_dir = fileparts(tmp_proc_dir);
+    [name,path] = uigetfile(fullfile(pat_dir,'*.crw'),'Select CRW file');
     CRW = loadCRW(fullfile(path,name));
     checkShouldSaveCRW(getappdata(handles.figure1,'ProcessedDir'),CRW);
     setappdata(handles.figure1,'PlannedCoords',CRW.FuncTarget);

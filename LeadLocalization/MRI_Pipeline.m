@@ -13,7 +13,7 @@ if isnumeric(Patient_DIR)
     error('No folder selected');
 else
     DICOM_Directory = dir([Patient_DIR,filesep,'DICOMDIR']);
-    if isempty(DICOM_Directory)
+    if isempty(DICOM_Directory) && ~exist(fullfile(Patient_DIR,'Processed'),'dir')
         error('Incorrect Patient Directory');
     end
 end
