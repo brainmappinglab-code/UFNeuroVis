@@ -4,15 +4,14 @@ clc; close all; clear;
 UFNeuroVis_setEnv;
 
 %% Step 0: Setups
+
 Patient_DIR = uigetdir('','Please select the subject Folder');
 if isnumeric(Patient_DIR) 
     error('No folder selected');
-else
-    DICOM_Directory = dir([Patient_DIR,filesep,'DICOMDIR']);
-    if isempty(DICOM_Directory) && ~exist(fullfile(Patient_DIR,'Processed'),'dir')
-        error('Incorrect Patient Directory');
-    end
+elseif ~exist(fullfile(Patient_DIR,'Processed'),'dir')
+    error('Incorrect Patient Directory');
 end
+
 fprintf('Change directory to patient directory...');
 cd(Patient_DIR);
 fprintf('Done\n\n');
@@ -22,7 +21,6 @@ CTFILTERED = false;
 TRANSFORMED = false;
 COREGISTERED = false;
 
-NifTi_DIR = [Patient_DIR,filesep,'NiiX'];
 Processed_DIR = [Patient_DIR,filesep,'Processed'];
 
 %% GET BOVA TRANSFORM

@@ -5,6 +5,15 @@ function leadLocalization( MRI, CT, leadFolder )
 %#ok<*INUSL>
 %#ok<*NASGU>
 
+if ~isfield(CT,'fileprefix') && ~isfield(MRI,'fileprefix')
+    % fileprefix appears to be used to determine if the intensity should be adjusted
+    % independently. Assumed that this is the case in most instances, so this setup should
+    % allow for independent intensity adjustments. Set to the same value to modulate both
+    % simultaneously
+    MRI.fileprefix='1';
+    CT.fileprefix='2';
+end
+
 % Setup Figure
 handles.gui = largeFigure(0, [1280 900]); clf(handles.gui);
 handles.sliceViews.Sagittal = axes(handles.gui, 'Units', 'Normalized', 'Position', [0 0.5 0.5 0.5], 'DataAspectRatio',[1 1 1]); cla(handles.sliceViews.Sagittal);

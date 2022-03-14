@@ -29,7 +29,7 @@ handles.reference.img = (handles.reference.img - handles.reference.intensityRang
 handles.coRegistered.img = (handles.coRegistered.img - handles.coRegistered.intensityRange(1)) / diff(handles.coRegistered.intensityRange);
 
 % Tonemapping CT
-handles.overlayImage = tonemapCT(registeredImage.img);
+handles.overlayImage = tonemapCT(registeredImage.img,true); % Second input has no meaning; used to denote this is a dbsarch image
 
 set(handles.gui, 'KeyPressFcn', @keyboardEvent);
 set(handles.gui, 'WindowScrollWheelFcn', @scrollSlice);

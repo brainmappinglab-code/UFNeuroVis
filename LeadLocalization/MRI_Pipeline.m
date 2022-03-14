@@ -6,6 +6,7 @@ UFNeuroVis_setEnv;
 
 %#ok<*NASGU>
 COREGISTER_METHOD = 1; % 1 - MATLAB
+USING_CLINICAL_IMAGES = true;
 
 %% Step 0: Setups
 Patient_DIR = uigetdir('','Please select the subject Folder');
@@ -26,7 +27,6 @@ CTFILTERED = false;
 TRANSFORMED = false;
 COREGISTERED = false;
 NEW_ACPC_COORDINATES=false;
-USING_CLINICAL_IMAGES = false;
 
 NifTi_DIR = [Patient_DIR,filesep,'NiiX'];
 Processed_DIR = [Patient_DIR,filesep,'Processed'];
@@ -136,6 +136,8 @@ else
             disp('Done with coregstration ANTs!');
             COREGISTERED=true;
     end
+    
+    [preop_T1,coregistered_CT]=removePaddedZeroes(Processed_DIR,preop_T1,coregistered_CT);
 end
 
 %% Step 4: Check coregistration
@@ -193,7 +195,7 @@ elseif USING_CLINICAL_IMAGES
         
         val=str2double(answer);
         
-        if val > 0 && val < length(file_crw)
+        if val > 0 && val <= length(file_crw)
             tform = LoadDBSArchACPC(fullfile(file_crw(val).folder,file_crw(val).name));
         end
     end
@@ -227,7 +229,11 @@ if COREGISTERED==true
 end
 
 %% Step 7: Normalization based on patient morph
-preop_T1_acpc = loadNifTi([Processed_DIR,filesep,'anat_t1_acpc.nii']);
+
+if ~isfield(preop_T1_acpc,'original')
+    preop_T1_acpc = loadNifTi([Processed_DIR,filesep,'anat_t1_acpc.nii']);
+end
+
 BovaAtlasFitter(preop_T1_acpc,Processed_DIR,NEURO_VIS_PATH);
 
 %% Step 8: reverse transform each patient

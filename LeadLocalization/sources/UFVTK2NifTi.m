@@ -11,6 +11,11 @@ rawData = fread(fid, Inf, 'uint8=>uint16');
 fclose(fid);
 
 info = initHeader(header);
+
+if ~strcmp(info.magic,'SVTK')
+    error('Header is incorrect. Expected magic = ''SVTK'', but received magic = ''%s''',info.magic)
+end
+
 Data = VTKShort2Single(rawData);
 
 if length(Data) ~= info.xdim*info.ydim*info.zdim
