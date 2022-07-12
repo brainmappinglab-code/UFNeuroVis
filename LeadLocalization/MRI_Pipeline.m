@@ -54,9 +54,24 @@ elseif exist(DBSArch_DIR,'dir') ~= 0 && (exist(fullfile(DBSArch_DIR,'mr'),'file'
         save_nii(preop_T1,[Processed_DIR,filesep,'anat_t1.nii']);
     end
     
+    % Search for other numbered mr files
+    mr_num=2;
+    
+    while exist(fullfile(DBSArch_DIR,sprintf('mr%d',mr_num)),'file') ~= 0 && ...
+            exist(fullfile(DBSArch_DIR,sprintf('mr%d.nii',mr_num)),'file') == 0
+        tmp_mr = UFVTK2NifTi(fullfile(DBSArch_DIR,sprintf('mr%d',mr_num)));
+        save_nii(preop_T1,[Processed_DIR,filesep,sprintf('mr%d.nii',mr_num)]);
+        mr_num = mr_num + 1;
+    end
+    
     if exist(fullfile(DBSArch_DIR,'ct.postop'),'file') ~= 0
         postop_ct = UFVTK2NifTi(fullfile(DBSArch_DIR,'ct.postop'));
         save_nii(postop_ct,[Processed_DIR,filesep,'postop_ct.nii']);
+    end
+    
+    if exist(fullfile(DBSArch_DIR,'ct.intraop'),'file') ~= 0
+        intraop_ct = UFVTK2NifTi(fullfile(DBSArch_DIR,'ct.intraop'));
+        save_nii(intraop_ct,[Processed_DIR,filesep,'intraop_ct.nii']);
     end
 else
     switch 6

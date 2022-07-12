@@ -11,6 +11,7 @@ end
 % The CT is already modified, so a copy of the original already exists
 
 save_nii(mr,fullfile(Processed_DIR,'anat_t1_original.nii'));
+save_nii(ct,fullfile(Processed_DIR,'rpostop_ct_original.nii'));
 
 %% Modify files to remove all zeroes
 
