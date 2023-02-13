@@ -197,7 +197,7 @@ if ~isempty(dir([Processed_DIR,filesep,'anat_t1_acpc.nii']))
             return;
     end
 elseif USING_CLINICAL_IMAGES
-    file_crw = dir(fullfile(DBSArch_DIR,'*VIM*'));
+    file_crw = dir(fullfile(DBSArch_DIR,'*CM*'));
     
     if length(file_crw) == 1
         tform = LoadDBSArchACPC(fullfile(file_crw.folder,file_crw.name));
@@ -206,7 +206,7 @@ elseif USING_CLINICAL_IMAGES
             fprintf('%d: %s\n',i,file_crw(i).name);
         end
         
-        answer=input('Multiple VIM CRW files discovered; choose one: ','s');
+        answer=input('Multiple CM CRW files discovered; choose one: ','s');
         
         val=str2double(answer);
         
